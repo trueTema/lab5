@@ -35,7 +35,6 @@ private:
 		bool operator>(_Value T) {
 			return this->value > T;
 		}
-		//привет это тест. как дела, дружище?
 		bool operator==(node& other) {
 			return (this->value == other.value) && (this->key == other.key) && (this->color == other.color);
 		}
