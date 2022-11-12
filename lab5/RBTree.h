@@ -1,6 +1,6 @@
 #pragma once
 
-enum except {Right, Left};
+enum except {BadAlloc, NoSuchElement};
 
 struct SetException {
 private:
@@ -10,14 +10,41 @@ public:
 		id = e;
 	}
 	std::string message() {
-		if (id == Right) return "Right";
-		if (id == Left) return "Right";
+		if (id == BadAlloc) return "Cannot allocate memory <!>";
+		if (id == NoSuchElement) return "There are no such element in dictionary <!>";
 	}
 };
 
-template<typename _Key, typename _Value>
+template<typename T, typename V>
+struct my_pair {
+public:
+	T first;
+	V second;
+	my_pair() = default;
+	my_pair(const my_pair<T, V>& other) {
+		this->first = other.first;
+		this->second = other.second;
+	}
+	my_pair(T a, V b) {
+		first = a;
+		second = b;
+	}
+	~my_pair() = default;
+	bool operator<(const my_pair<T, V>& other) const {
+		return this -> first < other.first;
+	}
+	bool operator>(const my_pair<T, V>& other) const {
+		return this -> first > other.first;
+	}
+	bool operator==(const my_pair<T, V>& other) const {
+		return this -> first == other.first;
+	}
+};
+
+template<typename _Key>
 class RBTree {
 private:
+	
 	enum _color { BLACK, RED, None };
 
 	struct node {
@@ -25,11 +52,16 @@ private:
 		node* left;
 		node* parent;
 		_Key key;
-		_Value value;
 		_color color;
-		node(const _Key key, const _Value value, const _color color) {
+		node(const node& other) {
+			this->key = other.key;
+			this->color = other.color;
+			left = nullptr;
+			right = nullptr;
+			parent = nullptr;
+		}
+		node(const _Key key, const _color color) {
 			this->key = key;
-			this->value = value;
 			this->color = color;
 			left = nullptr;
 			right = nullptr;
@@ -37,7 +69,7 @@ private:
 		}
 		~node() {}
 	};
-	void clear(node* cur) {
+	void clear(node* cur) noexcept {
 		if (cur == nullptr) return;
 		node* right = cur->right;
 		node* left = cur->left;
@@ -50,7 +82,7 @@ private:
 	node* root;
 	size_t size;
 
-	node* get_uncle(const node* cur) {
+	node* get_uncle(const node* cur) noexcept {
 		if (cur->parent->parent == nullptr) {
 			return nullptr;
 		}
@@ -59,14 +91,14 @@ private:
 		return cur->parent->parent->left;
 	}
 
-	bool isRight(const node* cur) {
+	bool isRight(const node* cur) noexcept {
 		if (cur->parent == nullptr) {
 			return false;
 		}
 		return cur->parent->right == cur;
 	}
 
-	node* getbrother(node* p) {
+	node* getbrother(const node* p) noexcept {
 		return isRight(p) ? p->parent->left : p->parent->right;
 	}
 
@@ -106,7 +138,7 @@ private:
 			cur->parent = p;
 	}
 
-	void fixnode(node* cur) {
+	void fixnode(node* cur) noexcept {
 		while (cur->parent != nullptr && cur->parent->color == RED) {
 			node* uncle = get_uncle(cur);
 			if (!isRight(cur->parent)) {
@@ -147,15 +179,15 @@ private:
 		this->root->color = BLACK;
 	}
 
-	node* nearest_key(node* cur) {
-		cur = cur->right;
-		while (cur->left != nullptr) {
-			cur = cur->left;
+	node* nearest_key(const node* cur) noexcept {
+		node* res = cur->right;
+		while (res->left != nullptr) {
+			res = res->left;
 		}
-		return cur;
+		return res;
 	}
 
-	_color GetChildColors(node* cur) {
+	_color GetChildColors(const node* cur) noexcept {
 		_color res = BLACK;
 		if (cur->right != nullptr) {
 			if (cur->right->color == RED) {
@@ -173,9 +205,7 @@ private:
 		return res;
 	}
 
-	
-
-	void fixdelete(node* p) {
+	void fixdelete(node* p) noexcept {
 		if (p == root) return;
 		node* bro = getbrother(p);
 		if (bro->color == BLACK) { //black bro
@@ -236,7 +266,7 @@ private:
 		return;
 	}
 
-	void delete_node(node* cur) {
+	void delete_node(node* cur) noexcept {
 		
 		//0 children
 		if (cur->left == nullptr && cur->right == nullptr) {
@@ -284,13 +314,11 @@ private:
 			
 			//black node deleting
 			if (cur->right != nullptr) {
-				cur -> value = cur->right->value;
 				cur -> key = cur->right->key;
 				delete_node(cur->right);
 				return;
 			}
 			else {
-				cur->value = cur->left->value;
 				cur->key = cur->left->key;
 				delete_node(cur->left);
 				return;
@@ -299,36 +327,50 @@ private:
 
 		//2 children
 		node* nearest = nearest_key(cur);
-		cur->value = nearest->value;
 		cur->key = nearest->key;
 		delete_node(nearest);
 		return;
+	}
+
+	void make_tree(node* cur, const node* other) {
+		if (other == nullptr) return;
+		if (other->left != nullptr) {
+			cur->left = new node(*other->left);
+			cur->left->parent = cur;
+		}
+		if (other->right != nullptr) {
+			cur->right = new node(*other->right);
+			cur->right->parent = cur;
+		}
+		make_tree(cur->left, other->left);
+		make_tree(cur->right, other->right);
 	}
 public:
 	RBTree() {
 		root = nullptr;
 		size = 0;
 	}
-	RBTree(const RBTree<_Key, _Value>& other) {
-		root = other.root;
+	RBTree(const RBTree<_Key>& other) {
+		root = new node(*other.root);
 		size = other.size;
+		make_tree(root, other.root);
 	}
 	~RBTree(){
 		clear(root);
 	}
 
-	size_t get_height(const node* cur) {
+	size_t get_height(const node* cur) const noexcept {
 		if (cur == nullptr) return 0;
 		return std::max(get_height(cur->left), get_height(cur->right)) + 1;
 	}
 
-	size_t get_height() {
+	size_t get_height() const noexcept {
 		return get_height(root);
 	}
 
-	void insert(const _Key key, const _Value value) {
+	void insert(const _Key key) {
 		if (this->root == nullptr) {
-			this->root = new node(key, value, BLACK);
+			this->root = new node(key, BLACK);
 			return;
 		}
 		node* cur = this->root;
@@ -343,23 +385,24 @@ public:
 				cur = cur->right;
 			}
 			else {
-				cur->value = value;
+				cur->key = key;
 				return;
 			}
 		}
+		size++;
 		if (parent->key < key) {
-			parent->right = new node(key, value, RED);
+			parent->right = new node(key, RED);
 			parent->right->parent = parent;
 			fixnode(parent->right);
 		}
 		else {
-			parent->left = new node(key, value, RED);
+			parent->left = new node(key, RED);
 			parent->left->parent = parent;
 			fixnode(parent->left);
 		}
 	}
 
-	_Value get(const _Key& key) {
+	_Key get(const _Key& key) const {
 		node* cur = root;
 		while (cur != nullptr) {
 
@@ -370,7 +413,7 @@ public:
 				cur = cur->left;
 			}
 			else {
-				return cur->value;
+				return cur->key;
 			}
 		}
 		if (cur == nullptr) throw "No such key";
@@ -386,6 +429,7 @@ public:
 				cur = cur->right;
 			}
 			else {
+				size--;
 				delete_node(cur);
 				return;
 			}
@@ -393,7 +437,11 @@ public:
 		throw "No such key";
 	}
 
-	bool find(const _Key& key) {
+	size_t size() const noexcept {
+		return this->size;
+	}
+
+	bool find(const _Key& key) const noexcept {
 		node* cur = root;
 		while (cur != nullptr) {
 			if (key < cur->key) {
@@ -409,44 +457,10 @@ public:
 		return false;
 	}
 
-	int max_check(node* cur) {
-		if (cur == nullptr) return 0;
-		if (cur->color == BLACK) {
-			return std::max(max_check(cur->left), max_check(cur->right)) + 1;
-		} 
-		return std::max(max_check(cur->left), max_check(cur->right));
-	}
-
-	int min_check(node* cur) {
-		if (cur == nullptr) return 0;
-		if (cur->color == BLACK) {
-			return std::min(max_check(cur->left), max_check(cur->right)) + 1;
-		}
-		return std::min(max_check(cur->left), max_check(cur->right));
-	}
-
-	bool check(node* cur) {
-		if (cur == nullptr) return true;
-		if (cur->color == RED) {
-			if (cur->left != nullptr && cur->left->color == RED) return false;
-			if (cur->right != nullptr && cur->right->color == RED) return false;
-		}
-		return (check(cur->left) && check(cur->right));
-	}
-
-	bool check() {
-		if (root == nullptr) return true;
-		if (root->color != BLACK) return false;
-		node* cur = root;
-		if (min_check(root) != max_check(root)) return false;
-		if (!check(root)) return false;
-		return true;
-	}
-
-	bool operator==(const RBTree<_Key, _Value>& other) {
+	bool operator==(const RBTree<_Key>& other) const {
 		return root == other.root;
 	}
-	bool operator!=(const RBTree<_Key, _Value>& other) {
+	bool operator!=(const RBTree<_Key>& other) const {
 		return root == other.root;
 	}
 };

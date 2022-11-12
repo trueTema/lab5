@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <map>
+#include "Dictionary.h"
 
 using namespace std;
 
@@ -11,48 +13,29 @@ int f(const int a, const int b) {
 	return a + b;
 }
 
+struct x {
+	int a;
+	x(int a) {
+		this->a = a;
+	}
+};
+
 int main() {
 	srand(time(0));
-	RBTree<int, int> rbt;
+	RBTree<int> rbt1;
+	rbt1.insert(1);
+	rbt1.insert(2);
+	rbt1.insert(3);
+	rbt1.insert(4);
+	rbt1.insert(5);
+	RBTree<int> rbt2(rbt1);
+	cout << rbt2.get(3);
 
-	vector<std::pair<int, int>> vec, vec2;
-	for (int i = 0; i < 10000; i++) {
-		int key = rand() % 20000 - 10000;
-		int value = rand() % 20000 - 10000;
-		if (!rbt.find(key)) {
-			vec.push_back(make_pair(key, value));
-			rbt.insert(key, value);
-		}
-	}
-	for (int i = 0; i < vec.size(); i++) {
-		int key = vec[i].first;
-		int value = vec[i].second;
-		//cout << "test: " << i + 1 << " " << key << " " << value << endl;
-		try {
-			if (rbt.get(key) != value) {
-				cout << "Lox";
-				return 0;
-			}
-			rbt.remove(key);
-			rbt.insert(key, value);
-		}
-		catch (...) {
-			cout << "failed test: " << i + 1 << " " << key << " " << value << endl;
-			return 0;
-		}
-	}
-	for (int i = 0; i < vec.size(); i++) {
-		int key = vec[i].first;
-		int value = vec[i].second;
-		try {
-			rbt.remove(key);
-		}
-		catch (...) {
-			cout << "failed test: " << i + 1 << " " << key << " " << value << endl;
-			return 0;
-		}
-	}
-
-	cout << endl << endl << rbt.get_height() << endl << endl << rbt.check();
+	/*Dictionary<int, int> mp;
+	mp.emplace(1, 5);
+	mp.emplace(2, 6);
+	mp.emplace(3, 7);
+	mp.emplace(4, 8);
+	cout << mp.get(3);*/
 	return 0;
 }
