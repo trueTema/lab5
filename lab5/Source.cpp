@@ -22,15 +22,10 @@ struct x {
 
 int main() {
 	srand(time(0));
-	RBTree<int> rbt1;
-	rbt1.insert(1);
-	rbt1.insert(2);
-	rbt1.insert(3);
-	rbt1.insert(4);
-	rbt1.insert(5);
-	RBTree<int> rbt2(rbt1);
-	cout << rbt2.get(3);
-
+	Dictionary<int, int> mp;
+	mp[2] = 3;
+	mp[3] = 4;
+	cout << mp[2];
 	/*Dictionary<int, int> mp;
 	mp.emplace(1, 5);
 	mp.emplace(2, 6);

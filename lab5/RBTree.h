@@ -3,9 +3,8 @@
 enum except {BadAlloc, NoSuchElement};
 
 struct SetException {
-private:
-	except id;
 public:
+	except id;
 	SetException(except e) {
 		id = e;
 	}
@@ -38,6 +37,9 @@ public:
 	}
 	bool operator==(const my_pair<T, V>& other) const {
 		return this -> first == other.first;
+	}
+	bool operator!=(const my_pair<T, V>& other) const {
+		return this->first != other.first;
 	}
 };
 
@@ -80,7 +82,7 @@ private:
 	}
 
 	node* root;
-	size_t size;
+	size_t _size;
 
 	node* get_uncle(const node* cur) noexcept {
 		if (cur->parent->parent == nullptr) {
@@ -345,14 +347,21 @@ private:
 		make_tree(cur->left, other->left);
 		make_tree(cur->right, other->right);
 	}
+
+	bool Equals(const node* cur, const node* other) const noexcept {
+		if (cur == other && cur == nullptr) return true;
+		if (cur->key != other->key) return false;
+		if (cur->color != other->color) return false;
+		return Equals(cur->left, other->left) && Equals(cur->right, other->right);
+	}
 public:
 	RBTree() {
 		root = nullptr;
-		size = 0;
+		_size = 0;
 	}
 	RBTree(const RBTree<_Key>& other) {
 		root = new node(*other.root);
-		size = other.size;
+		_size = other._size;
 		make_tree(root, other.root);
 	}
 	~RBTree(){
@@ -389,7 +398,7 @@ public:
 				return;
 			}
 		}
-		size++;
+		_size++;
 		if (parent->key < key) {
 			parent->right = new node(key, RED);
 			parent->right->parent = parent;
@@ -402,7 +411,7 @@ public:
 		}
 	}
 
-	_Key get(const _Key& key) const {
+	_Key& get(const _Key& key) {
 		node* cur = root;
 		while (cur != nullptr) {
 
@@ -416,7 +425,7 @@ public:
 				return cur->key;
 			}
 		}
-		if (cur == nullptr) throw "No such key";
+		if (cur == nullptr) throw SetException(NoSuchElement);
 	}
 
 	void remove(const _Key& key) {
@@ -429,16 +438,16 @@ public:
 				cur = cur->right;
 			}
 			else {
-				size--;
+				_size--;
 				delete_node(cur);
 				return;
 			}
 		}
-		throw "No such key";
+		throw SetException(NoSuchElement);
 	}
 
 	size_t size() const noexcept {
-		return this->size;
+		return this->_size;
 	}
 
 	bool find(const _Key& key) const noexcept {
@@ -457,11 +466,7 @@ public:
 		return false;
 	}
 
-	bool operator==(const RBTree<_Key>& other) const {
-		return root == other.root;
-	}
-	bool operator!=(const RBTree<_Key>& other) const {
-		return root == other.root;
+	bool Equals(const RBTree<_Key>& other) const noexcept {
+		return Equals(this->root, other.root);
 	}
 };
-
