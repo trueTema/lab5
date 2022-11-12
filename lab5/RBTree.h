@@ -66,6 +66,10 @@ private:
 		return cur->parent->right == cur;
 	}
 
+	node* getbrother(node* p) {
+		return isRight(p) ? p->parent->left : p->parent->right;
+	}
+
 	void rotateRight(node* cur) noexcept {
 			node* p = cur->left;
 			if (!p) return;
@@ -153,9 +157,6 @@ private:
 
 	_color GetChildColors(node* cur) {
 		_color res = BLACK;
-		if (cur == nullptr) {
-			return None;
-		}
 		if (cur->right != nullptr) {
 			if (cur->right->color == RED) {
 				res = RED;
@@ -172,147 +173,135 @@ private:
 		return res;
 	}
 
+	
+
 	void fixdelete(node* p) {
-		while (p->color == BLACK && p->parent != nullptr) {
-			if (!isRight(p)) {
-				if (p->parent->right != nullptr && p->parent->right->color == RED) {
-					p->parent->right->color = BLACK;
-					p->parent->color = RED;
-					rotateLeft(p->parent);
-				}
-				if (GetChildColors(p->parent->right) == BLACK) {
-					p->parent->right->color = RED;
+		if (p == root) return;
+		node* bro = getbrother(p);
+		if (bro->color == BLACK) { //black bro
+			if (GetChildColors(bro) == BLACK) { //all children are black
+				bro->color = RED;
+				if (p->parent->color == RED) {
+					p->parent->color = BLACK;
+					return;
 				}
 				else {
-					if (p->parent->right != nullptr) {
-						if (p->parent->right->right == nullptr || p->parent->right->right->color == BLACK) {
-							if (p->parent->right->left != nullptr)
-								p->parent->right->left->color = BLACK;
-							p->parent->right->color = RED;
-							rotateRight(p->parent->right);
-						}
-						p->parent->right->color = p->parent->color;
-
-						if (p->parent->right->right != nullptr) {
-							p->parent->right->right->color = BLACK;
-						}
-					}
-
-					p->parent->color = BLACK;
-					rotateLeft(p->parent);
-					p = root;
+					fixdelete(p->parent);
+					return;
+				}
+			}
+			if (!isRight(p)) {
+				if (bro -> right != nullptr && bro->right->color == RED) { //right child is red
+					bro->color = p->parent->color;
+					if (bro->right != nullptr)
+						bro->right->color = BLACK;
+					bro->parent->color = BLACK;
+					rotateLeft(bro->parent);
+					return;
+				}
+				if (bro->left->color == RED && (bro->right == nullptr || bro->right->color == BLACK)) { //left child is red and right is black
+					std::swap(bro->left->color, bro->color);
+					rotateRight(bro);
+					fixdelete(p);
+					return;
 				}
 			}
 			else {
-				if (p->parent->left != nullptr && p->parent->left->color == RED) {
-					p->parent->left->color = BLACK;
-					p->parent->color = RED;
-					rotateRight(p->parent);
+				if (bro -> left != nullptr && bro->left->color == RED) { //right child is red
+					bro->color = p->parent->color;
+					if (bro->left != nullptr)
+						bro->left->color = BLACK;
+					bro->parent->color = BLACK;
+					rotateRight(bro->parent);
+					return;
 				}
-				if (GetChildColors(p->parent->left) == BLACK) {
-					p->parent->left->color = RED;
-				}
-				else {
-					if (p->parent->left != nullptr) {
-						if (p->parent->left->left == nullptr || p->parent->left->left->color == BLACK) {
-							if (p->parent->left->right != nullptr)
-								p->parent->left->right->color = BLACK;
-							p->parent->left->color = RED;
-							rotateLeft(p->parent->left);
-						}
-						p->parent->left->color = p->parent->color;
-
-						if (p->parent->left->left != nullptr) {
-							p->parent->left->left->color = BLACK;
-						}
-					}
-
-					p->parent->color = BLACK;
-					rotateRight(p->parent);
-					p = root;
+				if (bro->right->color == RED && (bro->left == nullptr || bro->left->color == BLACK)) { //left child is red and right is black
+					std::swap(bro->right->color, bro->color);
+					rotateLeft(bro);
+					fixdelete(p);
+					return;
 				}
 			}
 		}
+		//red bro
+		p->parent->color = RED;
+		bro->color = BLACK;
+		if (!isRight(p)) {
+			rotateLeft(p->parent);
+		}
+		else {
+			rotateRight(p->parent);
+		}
+		fixdelete(p);
+		return;
 	}
 
 	void delete_node(node* cur) {
 		
+		//0 children
 		if (cur->left == nullptr && cur->right == nullptr) {
-			if (cur->parent == nullptr) {
+			if (cur->parent == nullptr) {//root
 				root = nullptr;
+				delete cur;
+				return;
 			}
-			else if (isRight(cur)) {
-				cur->parent->right = nullptr;
+			if (cur->color == RED) { //red
+				if (isRight(cur)) {
+					cur->parent->right = nullptr;
+				}
+				else {
+					cur->parent->left = nullptr;
+				}
+				delete cur;
+				return;
 			}
-			else {
-				cur->parent->left = nullptr;
-			}
+			
+			//black node deleting
+			fixdelete(cur);
+			if (isRight(cur)) cur->parent->right = nullptr;
+			else cur->parent->left = nullptr;
 			delete cur;
 			return;
 		}
-		node* nearest = cur;
-		_color deleting = cur->color;
-		if ((cur->right == nullptr) ^ (cur->left == nullptr)) {
-			if (cur->right != nullptr) {
-				if (cur->parent != nullptr && isRight(cur)) { //подумать что будет если корень 
-					cur->parent->right = cur->right;
-				}
-				else if (cur->parent != nullptr) {
-					cur->parent->left = cur->right;
-				}
-				cur->right->parent = cur->parent;
-				if (cur->parent == nullptr) {
-					root = cur->right;
-				}
-				//if ((cur->parent == nullptr) || (cur->parent->color == RED)) {
-				//	cur->right->color = BLACK;
-				//}
-			}
-			else {
-				if (cur->parent != nullptr && isRight(cur)) { //подумать что будет если корень 
-					cur->parent->right = cur->left;
-				}
-				else if (cur->parent != nullptr) {
-					cur->parent->left = cur->left;
-				}
-				cur->left->parent = cur->parent;
-				if (cur->parent == nullptr) {
-					root = cur->left;
-				}
-				//if ((cur->parent == nullptr) || (cur->parent->color == RED)) {
-				//	cur->left->color = BLACK;
-				//}
-			}
-			/*delete cur;
-			return;*/
-		}
-		else {
-			nearest = nearest_key(cur);
-			if (nearest->right != nullptr) {
-				nearest->right->parent = nearest->parent;
-			}
-			if (nearest->parent == nullptr) {
-				root = nearest->right;
-			}
-			else {
-				if (isRight(nearest)) {
-					nearest->parent->right = nearest->right;
+
+		//1 child
+		if ((cur->left == nullptr) ^ (cur->right == nullptr)) {
+			if (cur->parent == nullptr) { //root
+				this->root = cur->right != nullptr ? cur->right : cur->left;
+				if (cur->right != nullptr) {
+					cur->right->color = BLACK;
+					cur->right->parent = nullptr;
 				}
 				else {
-					nearest->parent->left = nearest->right;
+					cur->left->color = BLACK;
+					cur->left->parent = nullptr;
 				}
+				delete cur;
+				return;
+			}
+			
+			//red impossible
+			
+			//black node deleting
+			if (cur->right != nullptr) {
+				cur -> value = cur->right->value;
+				cur -> key = cur->right->key;
+				delete_node(cur->right);
+				return;
+			}
+			else {
+				cur->value = cur->left->value;
+				cur->key = cur->left->key;
+				delete_node(cur->left);
+				return;
 			}
 		}
-		if (nearest != cur) {
-			cur->color = nearest->color;
-			cur->key = nearest->key;
-			cur->value = nearest->value;
-		}
-		if (deleting == BLACK)
-			fixdelete(cur->left != nullptr ? cur->left : cur->right);
-		if (nearest != cur)
-			delete nearest;
-		else delete cur;
+
+		//2 children
+		node* nearest = nearest_key(cur);
+		cur->value = nearest->value;
+		cur->key = nearest->key;
+		delete_node(nearest);
 		return;
 	}
 public:
@@ -404,6 +393,22 @@ public:
 		throw "No such key";
 	}
 
+	bool find(const _Key& key) {
+		node* cur = root;
+		while (cur != nullptr) {
+			if (key < cur->key) {
+				cur = cur->left;
+			}
+			else if (key > cur->key) {
+				cur = cur->right;
+			}
+			else {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	int max_check(node* cur) {
 		if (cur == nullptr) return 0;
 		if (cur->color == BLACK) {
@@ -430,6 +435,7 @@ public:
 	}
 
 	bool check() {
+		if (root == nullptr) return true;
 		if (root->color != BLACK) return false;
 		node* cur = root;
 		if (min_check(root) != max_check(root)) return false;
