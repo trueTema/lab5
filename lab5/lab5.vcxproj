@@ -145,7 +145,9 @@
     <ClInclude Include="ArraySequence.h" />
     <ClInclude Include="Dictionary.h" />
     <ClInclude Include="DynamicArray.h" />
+    <ClInclude Include="exception.h" />
     <ClInclude Include="HashTable.h" />
+    <ClInclude Include="Iterators.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="ListSequence.h" />
     <ClInclude Include="RBTree.h" />

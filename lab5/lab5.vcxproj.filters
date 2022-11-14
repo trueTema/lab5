@@ -44,5 +44,11 @@
     <ClInclude Include="Sequence.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="exception.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Iterators.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
