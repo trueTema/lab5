@@ -1,18 +1,5 @@
 #pragma once
-
-enum except {BadAlloc, NoSuchElement};
-
-struct SetException {
-public:
-	except id;
-	SetException(except e) {
-		id = e;
-	}
-	std::string message() {
-		if (id == BadAlloc) return "Cannot allocate memory <!>";
-		if (id == NoSuchElement) return "There are no such element in dictionary <!>";
-	}
-};
+#include "exception.h"
 
 template<typename T, typename V>
 struct my_pair {

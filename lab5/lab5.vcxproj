@@ -142,16 +142,13 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ArraySequence.h" />
     <ClInclude Include="Dictionary.h" />
     <ClInclude Include="DynamicArray.h" />
     <ClInclude Include="exception.h" />
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="Iterators.h" />
     <ClInclude Include="LinkedList.h" />
-    <ClInclude Include="ListSequence.h" />
     <ClInclude Include="RBTree.h" />
-    <ClInclude Include="Sequence.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

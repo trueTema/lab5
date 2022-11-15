@@ -2,6 +2,7 @@
 #include "exception.h"
 #include "Sequence.h"
 #include "Iterators.h"
+#include <iostream>
 
 template<typename T, bool IsConst>
 class RandomAccessIterator;
@@ -38,9 +39,6 @@ public:
 	}
 	type& operator *() {
 		return arr->Get(cur_pos);
-	}
-	RandomAccessIterator<T, IsConst> operator ->() const {
-		return *this;
 	}
 	RandomAccessIterator<T, IsConst>& operator++() {
 		cur_pos++;
@@ -97,6 +95,8 @@ private:
 	T* items = nullptr;
 	int size = 0;
 	size_t used_items = 0;
+
+	void Rebuf(int);
 public:
 	//итератор
 	using iterator = RandomAccessIterator<T, false>;
@@ -133,10 +133,10 @@ public:
 
 	//операции
 	void Set(int, T);
-	void Resize(int);
 	void Append(T);
 	void Prepend(T);
 	void InsertAt(T, iterator);
+	void Resize(size_t);
 	DynamicArray<T>* GetSubArray(iterator, iterator);
 	DynamicArray<T>* Concat(DynamicArray<T>*);
 	void del_item(iterator);
@@ -161,7 +161,7 @@ DynamicArray<T>::DynamicArray() {
 template <class T>
 DynamicArray<T>::DynamicArray(size_t count, T fill) {
 	if (count < 0) throw SetException(SizeBelowZero);
-	items = new T[(count + 1) * 2];
+	items = reinterpret_cast<T*>(new char[(count + 1) * 2 * sizeof(T)]);
 	size = count * 2;
 	used_items = count;
 	for (int i = 0; i < count; i++) {
@@ -171,8 +171,8 @@ DynamicArray<T>::DynamicArray(size_t count, T fill) {
 template <class T>
 DynamicArray<T>::DynamicArray(T* items, int count) {
 	if (count < 0) throw SetException(SizeBelowZero);
-	this->items = new T[(count + 1) * 2];
-	size = count * 2;
+	this->items = reinterpret_cast<T*>(new char[(count + 1) * 2 * sizeof(T)]);;
+	size = (count + 1) * 2;
 	used_items = count;
 	for (int i = 0; i < count; i++) {
 		this->items[i] = items[i];
@@ -180,7 +180,7 @@ DynamicArray<T>::DynamicArray(T* items, int count) {
 }
 template <class T>
 DynamicArray<T>::DynamicArray(DynamicArray<T>* dynamic_array) {
-	items = new T[dynamic_array->size];
+	items = reinterpret_cast<T*>(new char[(dynamic_array.size) * sizeof(T)]);
 	size = dynamic_array->size;
 	used_items = dynamic_array->used_items;
 	for (int i = 0; i < size; i++) {
@@ -218,13 +218,13 @@ T& DynamicArray<T>::Get(int index) {
 
 
 template <class T>
-void DynamicArray<T>::Resize(int NewSize) {
+void DynamicArray<T>::Rebuf(int NewSize) {
 	if (NewSize < 0) {
 		throw SetException(SizeBelowZero);
 	}
 	try {
-		T* items_cur = new T[NewSize];
-		int cpy_num = (NewSize > size ? size : NewSize);
+		T* items_cur = reinterpret_cast<T*>(new char[NewSize * sizeof(T)]);
+		size_t cpy_num = NewSize > size ? size : NewSize;
 		memcpy(items_cur, items, cpy_num * sizeof(T));
 		delete[] items;
 		items = items_cur;
@@ -235,10 +235,16 @@ void DynamicArray<T>::Resize(int NewSize) {
 	}
 }
 
+template<class T>
+void DynamicArray<T>::Resize(size_t newSize) {
+	if (size < newSize) Rebuf(newSize);
+	used_items = newSize;
+}
+
 template <class T>
 void DynamicArray<T>::Append(T item) {
 	if (used_items >= size) {
-		this->Resize((size + 1) * 2);
+		this->Rebuf((size + 1) * 2);
 	}
 	used_items++;
 	this->Set(used_items - 1, item);
@@ -248,7 +254,7 @@ void DynamicArray<T>::Append(T item) {
 template <class T>
 void DynamicArray<T>::Prepend(T item) {
 	if (used_items >= size) {
-		this->Resize((size + 1) * 2);
+		this->Rebuf((size + 1) * 2);
 	}
 	memmove(this->items + 1, this->items, (used_items) * sizeof(T));
 	this->Set(0, item);
@@ -261,7 +267,7 @@ void DynamicArray<T>::InsertAt(T item, iterator it) {
 		throw SetException(IndexOutOfRange);
 	}
 	if (used_items >= size) {
-		this->Resize((size + 1) * 2);
+		this->Rebuf((size + 1) * 2);
 	}
 
 	memmove(this->items + distance<T>(begin(), it) + 1, this->items + distance<T>(begin(), it), (used_items - distance<T>(begin(), it)) * sizeof(T));
@@ -302,7 +308,7 @@ void DynamicArray<T>::del_item(iterator it) {
 	memmove(items + distance<T>(begin(), it), items + distance<T>(begin(), it) + 1, (used_items - 1 - distance<T>(begin(), it)) * sizeof(T));
 	used_items--;
 	if (used_items <= (size / 2)) {
-		this->Resize(this->size / 2);
+		this->Rebuf(this->size / 2);
 	}
 }
 

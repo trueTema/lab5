@@ -3,7 +3,7 @@
 #include <string>
 enum except_type { MemoryAllocateError, IndexOutOfRange, SizeBelowZero, NegativeRange, 
 	IncorrectComparator, IncorrectRange, IncorrectValue, IncorrectInputFormat, IncorrectIterator, 
-	NoRequiredArgument, UnknownFlag, UnknownCommand, MutuallyExclusive, TooManySort, EmptySequence};
+	NoRequiredArgument, UnknownFlag, UnknownCommand, NoSuchElement, MutuallyExclusive, TooManySort, EmptySequence};
 #include<iostream>
 
 class SetException {
@@ -26,5 +26,6 @@ public:
 		if (id == MutuallyExclusive) return "There are two or more mutually exclusive arguments";
 		if (id == TooManySort) return "You cannot compare too much function at the same time.";
 		if (id == EmptySequence) return "Your sequence is empty";
+		if (id == NoSuchElement) return "There are no such element in dictionary <!>";
 	}
 };

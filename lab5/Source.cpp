@@ -5,12 +5,13 @@
 #include <chrono>
 #include <map>
 #include "Dictionary.h"
+#include "HashTable.h"
 
 using namespace std;
 
 
-int f(const int a, const int b) {
-	return a + b;
+size_t __hash(int x) {
+	return x % 1;
 }
 
 struct x {
@@ -18,19 +19,17 @@ struct x {
 	x(int a) {
 		this->a = a;
 	}
+	x() = default;
+	friend ostream& operator<<(ostream& os, const x& a);
 };
+
+ostream& operator<<(ostream& os, const x& a) {
+	os << a.a;
+	return os;
+}
 
 int main() {
 	srand(time(0));
-	Dictionary<int, int> mp;
-	mp[2] = 3;
-	mp[3] = 4;
-	cout << mp[2];
-	/*Dictionary<int, int> mp;
-	mp.emplace(1, 5);
-	mp.emplace(2, 6);
-	mp.emplace(3, 7);
-	mp.emplace(4, 8);
-	cout << mp.get(3);*/
+	
 	return 0;
 }

@@ -34,15 +34,12 @@ public:
 	struct Item {
 		Item* next = nullptr;
 		Item* prev = nullptr;
-		T data = T();
+		T data;
 		Item(T data) {
 			this->data = data;
 		}
-		Item() {
-			this->data = T();
-		}
-		~Item() {
-		}
+		Item() = default;
+		~Item() = default;
 	};
 	struct List {
 		Item* head = nullptr;
@@ -129,6 +126,8 @@ public:
 		item->prev = newitem;
 		size++;
 	}
+
+
 
 	void delete_item(Item* item) {
 		if (item == nullptr) {
@@ -289,9 +288,6 @@ public:
 	}
 	type& operator *() {
 		return item->data;
-	}
-	BidirectionalIterator<T, IsConst> operator ->() const {
-		return *this;
 	}
 	BidirectionalIterator<T, IsConst>& operator++() {
 		item = item->next;
