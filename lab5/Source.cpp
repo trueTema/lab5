@@ -39,26 +39,30 @@ struct comparator {
 template<typename T>
 struct my_hash {
 	size_t operator()(const T& first) {
-		return std::hash<T>::_Do_hash(first);
+		return first % 10;
 	}
 };
 
 int main() {
 	srand(time(0));
-	HashTable<int, int, my_hash<int>, comparator<int>> ht;
+	HashTable<int, int, true, my_hash<int>, comparator<int>> ht;
 	ht.insert(1, 1);
 	ht.insert(2, 4);
 	ht.insert(3, 9);
-	Dictionary<int, int> dict;
-	dict.emplace(1, 1);
-	dict.emplace(2, 4);
-	dict.emplace(3, 9);
-	dict.emplace(4, 16);
-	dict.emplace(5, 25);
-	cout << dict[3] << endl;
-	cout << dict[5] << endl;
-	dict.remove(2);
-	cout << dict[1] << endl;
+	ht.insert(13, 10);
+	ht.insert(23, 11);
+	ht.insert(33, 12);
+	ht.insert(43, 13);
+	ht.insert(53, 14);
+	for (HashTable<int, int, true, my_hash<int>, comparator<int>>::iterator it = ht.begin(); it != ht.end(); it++) {
+		cout << (*it).first << " " << (*it).second << endl;
+	}
+	cout << endl << endl;
 	cout << ht.find(3) << endl;
+	cout << ht.find(13) << endl;
+	cout << ht.find(23) << endl;
+	cout << ht.find(33) << endl;
+	cout << ht.find(43) << endl;
+	cout << ht.find(53) << endl;
 	return 0;
 }

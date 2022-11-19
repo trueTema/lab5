@@ -284,7 +284,7 @@ public:
 	BidirectionalIterator(const BidirectionalIterator<T, IsConst>& other) : arr(other.arr) {
 		this->item = &(*other.item);
 	}
-	type& operator *() {
+	virtual type& operator *() {
 		return item->data;
 	}
 	BidirectionalIterator<T, IsConst>& operator++() {

@@ -460,4 +460,26 @@ public:
 	bool Equals(const RBTree<_Key, _Value>& other) const noexcept {
 		return Equals(this->root, other.root);
 	}
+
+	bool operator==(const RBTree<_Key, _Value, CanChangeValue>& other) const noexcept {
+		return this->Equals(other);
+	}
+	bool operator!=(const RBTree<_Key, _Value, CanChangeValue>& other) const noexcept {
+		return !this->Equals(other);
+	}
+
+	std::conditional_t<CanChangeValue, _Value&, const _Value&> operator[](const _Key& key) {
+		try {
+			return this->get(key);
+		}
+		catch (SetException e) {
+			if (e.id == NoSuchElement) {
+				this->insert(key, _Value());
+				return this->get(key);
+			}
+			else {
+				throw e;
+			}
+		}
+	}
 };
