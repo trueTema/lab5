@@ -1,5 +1,6 @@
 #pragma once
 #include "exception.h"
+#include "LinkedList.h"
 
 template<typename T, typename V>
 struct my_pair {
@@ -33,7 +34,10 @@ public:
 template<typename _Key, typename _Value, bool CanChangeValue = true>
 class RBTree {
 private:
-	
+	template<typename _Key, typename _Value>
+	friend class RBTIterator;
+
+
 	enum _color { BLACK, RED, None };
 
 	struct node {
@@ -43,6 +47,11 @@ private:
 		_Key key;
 		_Value value;
 		_color color;
+		node() {
+			right = nullptr;
+			left = nullptr;
+			parent = nullptr;
+		}
 		node(const node& other) {
 			this->key = other.key;
 			this->color = other.color;
@@ -61,6 +70,9 @@ private:
 		}
 		~node() {}
 	};
+	
+	LinkedList<node*> traversal_order;
+
 	void clear(node* cur) noexcept {
 		if (cur == nullptr) return;
 		node* right = cur->right;
@@ -345,7 +357,40 @@ private:
 		if (cur->value != other->value) return false;
 		return Equals(cur->left, other->left) && Equals(cur->right, other->right);
 	}
+
+	void fix_traversal_order(node* cur) {
+		if (cur->left == nullptr && cur->right == nullptr) {
+			traversal_order.push_back(cur);
+			return;
+		}
+		if (cur->left == nullptr) {
+			traversal_order.push_back(cur);
+			fix_traversal_order(cur->right);
+			return;
+		}
+		fix_traversal_order(cur->left);
+		traversal_order.push_back(cur);
+		if (cur->right != nullptr)
+			fix_traversal_order(cur->right);
+	}
+
+	void fix_traversal_order() {
+		traversal_order.clear();
+		fix_traversal_order(this->root);
+	}
 public:
+	using iterator = typename RBTIterator<_Key, _Value>;
+	iterator begin() {
+		typename LinkedList<node*>::iterator* it = new typename LinkedList<node*>::iterator(traversal_order.begin());
+		iterator* it_res = reinterpret_cast<iterator*>(it);
+		return *it_res;
+	}
+
+	iterator end() {
+		typename LinkedList<node*>::iterator* it = new typename LinkedList<node*>::iterator(traversal_order.end());
+		iterator* it_res = reinterpret_cast<iterator*>(it);
+		return *it_res;
+	}
 	RBTree() {
 		root = nullptr;
 		_size = 0;
@@ -371,6 +416,7 @@ public:
 	void insert(const _Key key, const _Value value) {
 		if (this->root == nullptr) {
 			this->root = new node(key, value, BLACK);
+			fix_traversal_order();
 			return;
 		}
 		node* cur = this->root;
@@ -400,6 +446,7 @@ public:
 			parent->left->parent = parent;
 			fixnode(parent->left);
 		}
+		fix_traversal_order();
 	}
 
 	std::conditional_t<CanChangeValue, _Value&, const _Value&> get(const _Key& key) {
@@ -431,6 +478,7 @@ public:
 			else {
 				_size--;
 				delete_node(cur);
+				fix_traversal_order();
 				return;
 			}
 		}
@@ -481,5 +529,17 @@ public:
 				throw e;
 			}
 		}
+	}
+};
+
+template<typename _Key, typename _Value>
+class RBTIterator : public BidirectionalIterator<typename RBTree<_Key, _Value>::node*, true> {
+private:
+	using thisiterator = BidirectionalIterator<typename RBTree<_Key, _Value>::node*, true>;
+public:
+
+	RBTIterator(const RBTIterator& other) : thisiterator(other) {}
+	std::pair<_Key, _Value> operator*() {
+		return std::make_pair(this->item->data->key, (this)->item->data->value);
 	}
 };

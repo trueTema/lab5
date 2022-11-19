@@ -45,26 +45,17 @@ struct my_hash {
 
 int main() {
 	srand(time(0));
-	HashTable<int, int, true, my_hash<int>, comparator<int>> ht;
-	ht.insert(1, 1);
-	ht.insert(2, 4);
-	ht.insert(3, 9);
-	ht.insert(13, 10);
-	ht.insert(23, 11);
-	ht.insert(33, 12);
-	ht.insert(43, 13);
-	ht.insert(53, 14);
-	HashTable<int, int, true, my_hash<int>, comparator<int>> ht2(ht);
-	for (HashTable<int, int, true, my_hash<int>, comparator<int>>::iterator it = ht.begin(); it != ht.end(); it++) {
+	RBTree<int, int> rbt;
+	rbt.insert(1, 1);
+	rbt.insert(2, 4);
+	rbt.insert(3, 9);
+	rbt.insert(4, 16);
+	for (RBTree<int, int>::iterator it = rbt.begin(); it != rbt.end(); it++) {
+		pair<int,int> p = (*it);
+		p.second = 107;
+	}
+	for (RBTree<int, int>::iterator it = rbt.begin(); it != rbt.end(); it++) {
 		cout << (*it).first << " " << (*it).second << endl;
 	}
-	cout << endl << endl;
-	cout << ht2.find(3) << endl;
-	cout << ht2.find(13) << endl;
-	cout << ht2.find(23) << endl;
-	cout << ht2.find(33) << endl;
-	cout << ht2.find(43) << endl;
-	cout << ht2.find(53) << endl;
-
 	return 0;
 }

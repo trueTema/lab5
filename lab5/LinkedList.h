@@ -69,9 +69,9 @@ public:
 			delete cur;
 			cur = cur2;
 		}
-		if (items) {
-			delete items;
-		}
+		items->head = nullptr;
+		items->tail = nullptr;
+		size = 0;
 	}
 
 	void push_back(T data) {
@@ -397,6 +397,7 @@ LinkedList<T>::LinkedList(std::initializer_list<T> list) {
 template<class T>
 LinkedList<T>::~LinkedList() {
 	clear();
+	delete items;
 }
 
 //функции

@@ -6,7 +6,7 @@
 
 template<typename _Key, typename _Value, bool CanChangeValue = true, class _Hash = std::hash<_Key>, class _cmp = std::equal_to<_Key>>
 class HashTable {
-	template<typename Key, typename Value, bool CanChangeValue>
+	template<typename Key, typename Value>
 	friend class HashTableIterator;
 	_cmp comparator;
 	_Hash hasher;
@@ -66,7 +66,7 @@ private:
 	}
 public:
 
-	using iterator = HashTableIterator<_Key, _Value, CanChangeValue>;
+	using iterator = HashTableIterator<_Key, _Value>;
 
 	HashTable() {
 		hash_capacity = 1;
@@ -168,13 +168,13 @@ public:
 	}
 };
 
-template<typename _Key, typename _Value, bool CanChangeValue = true>
-class HashTableIterator : public BidirectionalIterator<typename HashTable<_Key, _Value, CanChangeValue>::Elem, true> {
-	using thisiterator = BidirectionalIterator<typename HashTable<_Key, _Value, CanChangeValue>::Elem, true>;
+template<typename _Key, typename _Value>
+class HashTableIterator : public BidirectionalIterator<typename HashTable<_Key, _Value>::Elem, true> {
+private:
+	using thisiterator = BidirectionalIterator<typename HashTable<_Key, _Value>::Elem, true>;
 public:
-	HashTableIterator(const HashTableIterator<_Key, _Value, CanChangeValue>& other) : thisiterator(other) {}
+	HashTableIterator(const HashTableIterator<_Key, _Value>& other) : thisiterator(other) {}
 	std::pair<_Key, _Value> operator*() {
-		std::conditional_t<CanChangeValue, _Value&, const _Value&> val = (this)->item->data.value;
-		return std::make_pair((this->item)->data.key, val);
+		return std::make_pair((this->item)->data.key, (this)->item->data.value);
 	}
 };
