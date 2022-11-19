@@ -120,6 +120,7 @@ public:
 	DynamicArray(size_t, T);
 	DynamicArray(T*, int);
 	DynamicArray(DynamicArray<T>*);
+	DynamicArray(const DynamicArray<T>&);
 	DynamicArray(std::initializer_list<T>);
 
 	//деконструктор
@@ -176,14 +177,13 @@ DynamicArray<T>::DynamicArray(T* items, int count) {
 		this->items[i] = items[i];
 	}
 }
+
 template <class T>
-DynamicArray<T>::DynamicArray(DynamicArray<T>* dynamic_array) {
+DynamicArray<T>::DynamicArray(const DynamicArray<T>& dynamic_array) {
 	items = reinterpret_cast<T*>(new char[(dynamic_array.size) * sizeof(T)]);
-	size = dynamic_array->size;
-	used_items = dynamic_array->used_items;
-	for (int i = 0; i < size; i++) {
-		items[i] = dynamic_array->items[i];
-	}
+	size = dynamic_array.size;
+	used_items = dynamic_array.used_items;
+	memcpy(this->items, dynamic_array.items, size * sizeof(T));
 }
 
 template<class T>

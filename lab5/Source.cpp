@@ -54,15 +54,17 @@ int main() {
 	ht.insert(33, 12);
 	ht.insert(43, 13);
 	ht.insert(53, 14);
+	HashTable<int, int, true, my_hash<int>, comparator<int>> ht2(ht);
 	for (HashTable<int, int, true, my_hash<int>, comparator<int>>::iterator it = ht.begin(); it != ht.end(); it++) {
 		cout << (*it).first << " " << (*it).second << endl;
 	}
 	cout << endl << endl;
-	cout << ht.find(3) << endl;
-	cout << ht.find(13) << endl;
-	cout << ht.find(23) << endl;
-	cout << ht.find(33) << endl;
-	cout << ht.find(43) << endl;
-	cout << ht.find(53) << endl;
+	cout << ht2.find(3) << endl;
+	cout << ht2.find(13) << endl;
+	cout << ht2.find(23) << endl;
+	cout << ht2.find(33) << endl;
+	cout << ht2.find(43) << endl;
+	cout << ht2.find(53) << endl;
+
 	return 0;
 }

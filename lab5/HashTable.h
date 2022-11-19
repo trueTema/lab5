@@ -1,5 +1,6 @@
 #pragma once
 #include <type_traits>
+#include <iostream>
 #include "LinkedList.h"
 #include "DynamicArray.h"
 
@@ -73,22 +74,23 @@ public:
 		HashVector.Append(HashList.end());
 	}
 
-	HashTable(const HashTable<_Key, _Value, CanChangeValue, _Hash, _cmp>& other) {
-		for (HashTable<_Key, _Value, CanChangeValue, _Hash, _cmp>::iterator it = other.begin(); it != other.end(); it++) {
-			this->insert((*it).key, (*it).value);
-		}
-	}
+	
 
 	iterator begin() {
-		typename LinkedList<Elem>::iterator it = HashList.begin();
-		iterator res = it;
-		return res;
+		typename LinkedList<Elem>::iterator* it = new typename LinkedList<Elem>::iterator(HashList.begin());
+		iterator* it_res = reinterpret_cast<iterator*>(it);
+		return *it_res;
 	}
 
 	iterator end() {
-		typename LinkedList<Elem>::iterator it = HashList.end();
-		iterator res = it;
-		return res;
+		typename LinkedList<Elem>::iterator* it = new typename LinkedList<Elem>::iterator(HashList.end());
+		iterator* it_res = reinterpret_cast<iterator*>(it);
+		return *it_res;
+	}
+
+	HashTable(const HashTable<_Key, _Value, CanChangeValue, _Hash, _cmp>& other) : HashList(other.HashList), HashVector(other.HashVector) {
+		this->size = other.size;
+		this->hash_capacity = other.hash_capacity;
 	}
 
 	void insert(const _Key& key, const _Value& value) {
@@ -152,12 +154,12 @@ public:
 
 	std::conditional_t<CanChangeValue, _Value&, const _Value&> operator[](const _Key& key) {
 		try {
-			return this->get(key);
+			return this->find(key);
 		}
 		catch (SetException e) {
 			if (e.id == NoSuchElement) {
 				this->insert(key, _Value());
-				return this->get(key);
+				return this->find(key);
 			}
 			else {
 				throw e;
@@ -167,39 +169,12 @@ public:
 };
 
 template<typename _Key, typename _Value, bool CanChangeValue = true>
-class HashTableIterator : public BidirectionalIterator<typename HashTable<_Key, _Value, CanChangeValue>::Elem, false> {
-	using thisiterator = BidirectionalIterator<typename HashTable<_Key, _Value, CanChangeValue>::Elem, false>;
-private:
-	thisiterator it;
-	std::conditional_t<CanChangeValue, _Value&, const _Value&> GetValue(const thisiterator& it) {
-		return (*it).value;
-	}
+class HashTableIterator : public BidirectionalIterator<typename HashTable<_Key, _Value, CanChangeValue>::Elem, true> {
+	using thisiterator = BidirectionalIterator<typename HashTable<_Key, _Value, CanChangeValue>::Elem, true>;
 public:
-	HashTableIterator(const HashTableIterator<_Key, _Value>& other) : it(other.it) {}
-	HashTableIterator(const thisiterator& other) : it(other) {}
+	HashTableIterator(const HashTableIterator<_Key, _Value, CanChangeValue>& other) : thisiterator(other) {}
 	std::pair<_Key, _Value> operator*() {
-		return std::make_pair((*it).key, GetValue(it));
-	}
-	HashTableIterator<_Key, _Value, CanChangeValue>& operator++() {
-		it++;
-		return *this;
-	}
-	HashTableIterator<_Key, _Value, CanChangeValue>& operator--() {
-		it--;
-		return *this;
-	}
-	HashTableIterator<_Key, _Value, CanChangeValue>& operator++(int) {
-		it++;
-		return *this;
-	}
-	HashTableIterator<_Key, _Value, CanChangeValue>& operator--(int) {
-		it--;
-		return *this;
-	}
-	bool operator==(const HashTableIterator<_Key, _Value, CanChangeValue>& other) {
-		return (this->it) == (other.it);
-	}
-	bool operator!=(const HashTableIterator<_Key, _Value, CanChangeValue>& other) {
-		return (this->it) != (other.it);
+		std::conditional_t<CanChangeValue, _Value&, const _Value&> val = (this)->item->data.value;
+		return std::make_pair((this->item)->data.key, val);
 	}
 };
