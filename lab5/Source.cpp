@@ -6,6 +6,7 @@
 #include <map>
 #include "Dictionary.h"
 #include "HashTable.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -28,8 +29,23 @@ ostream& operator<<(ostream& os, const x& a) {
 	return os;
 }
 
+template<typename T>
+struct comparator {
+	bool operator()(const T& first, const T& second) {
+		return first == second;
+	}
+};
+
+template<typename T>
+struct my_hash {
+	size_t operator()(const T& first) {
+		return first % 10;
+	}
+};
+
 int main() {
 	srand(time(0));
+	HashTable<int, int, std::hash<int>, comparator<int>> ht;
 	
 	return 0;
 }

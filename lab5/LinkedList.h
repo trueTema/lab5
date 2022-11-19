@@ -1,7 +1,5 @@
 #pragma once
 #include "exception.h"
-#include "Sequence.h"
-#include "Iterators.h"
 
 template<typename T, bool IsConst>
 class BidirectionalIterator;
@@ -134,7 +132,7 @@ public:
 			throw SetException(IndexOutOfRange);
 		}
 
-		if (item->prev != nullptr && item->next != nullptr) {
+		if (item->prev != nullptr && item->next != items->tail) {
 			item->prev->next = item->next;
 			item->next->prev = item->prev;
 		}
@@ -142,13 +140,13 @@ public:
 		//	items->tail = cur->prev;
 		//	items->tail->next = nullptr;
 		//}
-		else if (item->prev == nullptr && item->next != nullptr) {
+		else if (item->prev == nullptr && item->next != items->tail) {
 			items->head = item->next;
 			items->head->prev = nullptr;
 		}
 		else {
-			items->head = nullptr;
-			items->tail->prev = nullptr;
+			items->tail->prev = item->prev;
+			item->prev->next = items->tail;
 		}
 
 		delete item;
@@ -209,7 +207,7 @@ public:
 		catch (std::bad_alloc) {
 			throw SetException(MemoryAllocateError);
 		}
-
+		items->head->prev = cur;
 		cur->next = items->head;
 		cur->prev = nullptr;
 		items->head = cur;

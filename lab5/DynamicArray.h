@@ -1,7 +1,5 @@
 #pragma once
 #include "exception.h"
-#include "Sequence.h"
-#include "Iterators.h"
 #include <iostream>
 
 template<typename T, bool IsConst>
