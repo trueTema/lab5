@@ -7,9 +7,8 @@ enum except_type { MemoryAllocateError, IndexOutOfRange, SizeBelowZero, Negative
 #include<iostream>
 
 class SetException {
-private:
-	except_type id;
 public:
+	except_type id;
 	SetException(except_type id) { this->id = id; }
 	const char* message() {
 		if (id == MemoryAllocateError) return "Cannot allocate memory";

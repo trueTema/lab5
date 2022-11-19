@@ -30,7 +30,7 @@ public:
 	}
 };
 
-template<typename _Key, bool CanChangeValue = true>
+template<typename _Key, typename _Value, bool CanChangeValue = true>
 class RBTree {
 private:
 	
@@ -41,17 +41,20 @@ private:
 		node* left;
 		node* parent;
 		_Key key;
+		_Value value;
 		_color color;
 		node(const node& other) {
 			this->key = other.key;
 			this->color = other.color;
+			this->value = other.value;
 			left = nullptr;
 			right = nullptr;
 			parent = nullptr;
 		}
-		node(const _Key key, const _color color) {
+		node(const _Key key, const _Value value, const _color color) {
 			this->key = key;
 			this->color = color;
+			this->value = value;
 			left = nullptr;
 			right = nullptr;
 			parent = nullptr;
@@ -339,6 +342,7 @@ private:
 		if (cur == other && cur == nullptr) return true;
 		if (cur->key != other->key) return false;
 		if (cur->color != other->color) return false;
+		if (cur->value != other->value) return false;
 		return Equals(cur->left, other->left) && Equals(cur->right, other->right);
 	}
 public:
@@ -346,7 +350,7 @@ public:
 		root = nullptr;
 		_size = 0;
 	}
-	RBTree(const RBTree<_Key>& other) {
+	RBTree(const RBTree<_Key, _Value>& other) {
 		root = new node(*other.root);
 		_size = other._size;
 		make_tree(root, other.root);
@@ -364,9 +368,9 @@ public:
 		return get_height(root);
 	}
 
-	void insert(const _Key key) {
+	void insert(const _Key key, const _Value value) {
 		if (this->root == nullptr) {
-			this->root = new node(key, BLACK);
+			this->root = new node(key, value, BLACK);
 			return;
 		}
 		node* cur = this->root;
@@ -387,18 +391,18 @@ public:
 		}
 		_size++;
 		if (parent->key < key) {
-			parent->right = new node(key, RED);
+			parent->right = new node(key, value, RED);
 			parent->right->parent = parent;
 			fixnode(parent->right);
 		}
 		else {
-			parent->left = new node(key, RED);
+			parent->left = new node(key, value, RED);
 			parent->left->parent = parent;
 			fixnode(parent->left);
 		}
 	}
 
-	std::conditional_t<CanChangeValue, _Key&, const _Key&> get(const _Key& key) {
+	std::conditional_t<CanChangeValue, _Value&, const _Value&> get(const _Key& key) {
 		node* cur = root;
 		while (cur != nullptr) {
 
@@ -409,7 +413,7 @@ public:
 				cur = cur->left;
 			}
 			else {
-				return cur->key;
+				return cur->value;
 			}
 		}
 		if (cur == nullptr) throw SetException(NoSuchElement);
@@ -453,7 +457,7 @@ public:
 		return false;
 	}
 
-	bool Equals(const RBTree<_Key>& other) const noexcept {
+	bool Equals(const RBTree<_Key, _Value>& other) const noexcept {
 		return Equals(this->root, other.root);
 	}
 };
