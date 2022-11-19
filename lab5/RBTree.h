@@ -34,7 +34,7 @@ public:
 template<typename _Key, typename _Value, bool CanChangeValue = true>
 class RBTree {
 private:
-	template<typename _Key, typename _Value>
+	template<typename _Key, typename _Value, bool CanChangeValue>
 	friend class RBTIterator;
 
 
@@ -44,26 +44,22 @@ private:
 		node* right;
 		node* left;
 		node* parent;
-		_Key key;
-		_Value value;
+		std::pair<const _Key, _Value> data;
 		_color color;
 		node() {
 			right = nullptr;
 			left = nullptr;
 			parent = nullptr;
 		}
-		node(const node& other) {
-			this->key = other.key;
+		node(const node& other) : data(other.data) {
 			this->color = other.color;
-			this->value = other.value;
+			this->data = other.data;
 			left = nullptr;
 			right = nullptr;
 			parent = nullptr;
 		}
-		node(const _Key key, const _Value value, const _color color) {
-			this->key = key;
+		node(const _Key& key, const _Value& value, const _color& color) : data(key, value){
 			this->color = color;
-			this->value = value;
 			left = nullptr;
 			right = nullptr;
 			parent = nullptr;
@@ -352,9 +348,8 @@ private:
 
 	bool Equals(const node* cur, const node* other) const noexcept {
 		if (cur == other && cur == nullptr) return true;
-		if (cur->key != other->key) return false;
+		if (cur->data != other->data) return false;
 		if (cur->color != other->color) return false;
-		if (cur->value != other->value) return false;
 		return Equals(cur->left, other->left) && Equals(cur->right, other->right);
 	}
 
@@ -379,7 +374,7 @@ private:
 		fix_traversal_order(this->root);
 	}
 public:
-	using iterator = typename RBTIterator<_Key, _Value>;
+	using iterator = typename RBTIterator<_Key, _Value, CanChangeValue>;
 	iterator begin() {
 		typename LinkedList<node*>::iterator* it = new typename LinkedList<node*>::iterator(traversal_order.begin());
 		iterator* it_res = reinterpret_cast<iterator*>(it);
@@ -413,7 +408,7 @@ public:
 		return get_height(root);
 	}
 
-	void insert(const _Key key, const _Value value) {
+	void insert(const _Key& key, const _Value& value) {
 		if (this->root == nullptr) {
 			this->root = new node(key, value, BLACK);
 			fix_traversal_order();
@@ -422,21 +417,21 @@ public:
 		node* cur = this->root;
 		node* parent = cur;
 		while (cur != nullptr) {
-			if (cur->key > key) {
+			if (cur->data.first > key) {
 				parent = cur;
 				cur = cur->left;
 			}
-			else if (cur->key < key) {
+			else if (cur->data.first < key) {
 				parent = cur;
 				cur = cur->right;
 			}
 			else {
-				cur->key = key;
+				cur->data.second = value;
 				return;
 			}
 		}
 		_size++;
-		if (parent->key < key) {
+		if (parent->data.first < key) {
 			parent->right = new node(key, value, RED);
 			parent->right->parent = parent;
 			fixnode(parent->right);
@@ -453,14 +448,14 @@ public:
 		node* cur = root;
 		while (cur != nullptr) {
 
-			if (cur->key < key) {
+			if (cur->data.first < key) {
 				cur = cur->right;
 			}
-			else if (cur->key > key) {
+			else if (cur->data.first > key) {
 				cur = cur->left;
 			}
 			else {
-				return cur->value;
+				return cur->data.second;
 			}
 		}
 		if (cur == nullptr) throw SetException(NoSuchElement);
@@ -469,10 +464,10 @@ public:
 	void remove(const _Key& key) {
 		node* cur = root;
 		while (cur != nullptr) {
-			if (key < cur->key) {
+			if (key < cur->data.first) {
 				cur = cur->left;
 			}
-			else if (key > cur->key) {
+			else if (key > cur->data.first) {
 				cur = cur->right;
 			}
 			else {
@@ -492,10 +487,10 @@ public:
 	bool find(const _Key& key) const noexcept {
 		node* cur = root;
 		while (cur != nullptr) {
-			if (key < cur->key) {
+			if (key < cur->data.first) {
 				cur = cur->left;
 			}
-			else if (key > cur->key) {
+			else if (key > cur->data.first) {
 				cur = cur->right;
 			}
 			else {
@@ -532,14 +527,13 @@ public:
 	}
 };
 
-template<typename _Key, typename _Value>
+template<typename _Key, typename _Value, bool CanChangeValue = true>
 class RBTIterator : public BidirectionalIterator<typename RBTree<_Key, _Value>::node*, true> {
 private:
 	using thisiterator = BidirectionalIterator<typename RBTree<_Key, _Value>::node*, true>;
 public:
-
 	RBTIterator(const RBTIterator& other) : thisiterator(other) {}
-	std::pair<_Key, _Value> operator*() {
-		return std::make_pair(this->item->data->key, (this)->item->data->value);
+	std::conditional_t<CanChangeValue, std::pair <const _Key, _Value>&, const std::pair <const _Key, _Value>&> operator*() {
+		return this->item->data->data;
 	}
 };

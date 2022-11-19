@@ -33,9 +33,7 @@ public:
 		Item* next = nullptr;
 		Item* prev = nullptr;
 		T data;
-		Item(T data) {
-			this->data = data;
-		}
+		Item(const T& newdata) : data(newdata) {}
 		Item() = default;
 		~Item() = default;
 	};

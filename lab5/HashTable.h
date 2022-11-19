@@ -6,7 +6,7 @@
 
 template<typename _Key, typename _Value, bool CanChangeValue = true, class _Hash = std::hash<_Key>, class _cmp = std::equal_to<_Key>>
 class HashTable {
-	template<typename Key, typename Value>
+	template<typename Key, typename Value, bool CanChangeValue>
 	friend class HashTableIterator;
 	_cmp comparator;
 	_Hash hasher;
@@ -17,20 +17,17 @@ private:
 	struct Elem {
 		size_t tmp_hash;
 		size_t real_hash;
-		_Key key;
-		_Value value;
+		std::pair<const _Key, _Value> data;
 		Elem() = default;
-		Elem(const _Key& key, const _Value& value, const size_t hash, const size_t tmp) {
-			this->key = key;
+		Elem(const _Key& key, const _Value& value, const size_t hash, const size_t tmp) : data(key, value) {
 			this->real_hash = hash;
 			this->tmp_hash = tmp;
-			this->value = value;
 		}
 		bool operator==(const Elem& other) {
-			return other.real_hash == real_hash && comparator(other.key, key) && other.value == value;
+			return other.real_hash == real_hash && comparator(other.data.first, data.first) && other.data.second == data.second;
 		}
 		bool operator!=(const Elem& other) {
-			return !(other.real_hash == real_hash && comparator(other.key, key) && other.value == value);
+			return !(other.real_hash == real_hash && comparator(other.data.first, data.first) && other.data.second == data.second);
 		}
 	};
 	LinkedList<Elem> HashList;
@@ -43,10 +40,11 @@ private:
 		for (int i = prev_capacity; i < hash_capacity; i++) {
 			HashVector[i] = HashList.end();
 		}
+
 		for (typename LinkedList<Elem>::iterator it = HashList.begin(); it != HashList.end(); ) {
-			if ((HashVector[(*it).real_hash % hash_capacity] == HashList.end()) || ((*HashVector[(*it).real_hash % hash_capacity]).real_hash != (*it).real_hash)) {
-				HashList.push_tobegin(*it);
+			if ((HashVector[(*it).real_hash % hash_capacity] == HashList.end()) || (((*HashVector[(*it).real_hash % hash_capacity]).real_hash % hash_capacity) != ((*it).real_hash % hash_capacity))) {
 				(*it).tmp_hash = (*it).real_hash % hash_capacity;
+				HashList.push_tobegin(*it);
 				HashVector[(*it).real_hash % hash_capacity] = HashList.begin();
 				if (it == HashVector[(*it).real_hash % prev_capacity]) {
 					HashVector[(*it).real_hash % prev_capacity] = HashList.end();
@@ -66,15 +64,13 @@ private:
 	}
 public:
 
-	using iterator = HashTableIterator<_Key, _Value>;
+	using iterator = HashTableIterator<_Key, _Value, CanChangeValue>;
 
 	HashTable() {
 		hash_capacity = 1;
 		size = 0;
 		HashVector.Append(HashList.end());
 	}
-
-	
 
 	iterator begin() {
 		typename LinkedList<Elem>::iterator* it = new typename LinkedList<Elem>::iterator(HashList.begin());
@@ -112,7 +108,7 @@ public:
 	void remove(const _Key& key) {
 		size_t hash = hasher(key);
 		for (typename LinkedList<Elem>::iterator it = HashVector[hash % hash_capacity]; it != HashList.end() && (*it).tmp_hash == (hash % hash_capacity); it++) {
-			if (comparator((*it).key, key)) {
+			if (comparator((*it).data.first, key)) {
 				if (it == HashVector[hash % hash_capacity] && ((it + 1) == HashList.end() || (*(it + 1)).real_hash != (*it).real_hash)) {
 					HashVector[hash % hash_capacity] = HashList.end();
 				}
@@ -130,8 +126,8 @@ public:
 	std::conditional_t<CanChangeValue, _Value&, const _Value&> find(const _Key& key) {
 		size_t hash = hasher(key);
 		for (typename LinkedList<Elem>::iterator it = HashVector[hash % hash_capacity]; it != HashList.end() && (*it).tmp_hash == (hash % hash_capacity); it++) {
-			if (comparator((*it).key, key)) {
-				return (*it).value;
+			if (comparator((*it).data.first, key)) {
+				return (*it).data.second;
 			}
 		}
 		throw SetException(NoSuchElement);
@@ -168,13 +164,13 @@ public:
 	}
 };
 
-template<typename _Key, typename _Value>
+template<typename _Key, typename _Value, bool CanChangeValue = true>
 class HashTableIterator : public BidirectionalIterator<typename HashTable<_Key, _Value>::Elem, true> {
 private:
 	using thisiterator = BidirectionalIterator<typename HashTable<_Key, _Value>::Elem, true>;
 public:
 	HashTableIterator(const HashTableIterator<_Key, _Value>& other) : thisiterator(other) {}
-	std::pair<_Key, _Value> operator*() {
-		return std::make_pair((this->item)->data.key, (this)->item->data.value);
+	std::conditional_t<CanChangeValue, std::pair <const _Key, _Value>&, const std::pair <const _Key, _Value>&> operator*() {
+		return this->item->data.data;
 	}
 };

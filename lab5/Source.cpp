@@ -5,7 +5,7 @@
 #include <chrono>
 #include <map>
 #include "Dictionary.h"
-#include "HashTable.h"
+#include "HashDictionary.h"
 #include <unordered_map>
 
 using namespace std;
@@ -43,19 +43,8 @@ struct my_hash {
 	}
 };
 
+
 int main() {
 	srand(time(0));
-	RBTree<int, int> rbt;
-	rbt.insert(1, 1);
-	rbt.insert(2, 4);
-	rbt.insert(3, 9);
-	rbt.insert(4, 16);
-	for (RBTree<int, int>::iterator it = rbt.begin(); it != rbt.end(); it++) {
-		pair<int,int> p = (*it);
-		p.second = 107;
-	}
-	for (RBTree<int, int>::iterator it = rbt.begin(); it != rbt.end(); it++) {
-		cout << (*it).first << " " << (*it).second << endl;
-	}
 	return 0;
 }
