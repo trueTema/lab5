@@ -46,6 +46,10 @@ struct my_hash {
 int main() {
 	srand(time(0));
 	HashTable<int, int, std::hash<int>, comparator<int>> ht;
-	
+	ht.insert(1, 1);
+	ht.insert(2, 4);
+	ht.insert(3, 9);
+	ht.find(1) = 5;
+	cout << ht.find(1);
 	return 0;
 }

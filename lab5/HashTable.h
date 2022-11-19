@@ -3,7 +3,7 @@
 #include "LinkedList.h"
 #include "DynamicArray.h"
 
-template<typename _Key, typename _Value, class _Hash = std::hash<_Key>, class _cmp = std::equal_to<_Key>>
+template<typename _Key, typename _Value, class _Hash = std::hash<_Key>, class _cmp = std::equal_to<_Key>, bool CanChangeValue = true>
 class HashTable {
 	template<typename Key, typename Value>
 	friend class HashTableIterator;
@@ -108,7 +108,7 @@ public:
 		throw SetException(NoSuchElement);
 	}
 
-	const _Value& find(const _Key& key) {
+	std::conditional_t<CanChangeValue, _Value&, const _Value&> find(const _Key& key) {
 		size_t hash = hasher(key);
 		for (typename LinkedList<Elem>::iterator it = HashVector[hash % hash_capacity]; it != HashList.end() && (*it).hash == hash; it++) {
 			if (comparator((*it).key, key)) {

@@ -30,7 +30,7 @@ public:
 	}
 };
 
-template<typename _Key>
+template<typename _Key, bool CanChangeValue = true>
 class RBTree {
 private:
 	
@@ -398,7 +398,7 @@ public:
 		}
 	}
 
-	_Key& get(const _Key& key) {
+	std::conditional_t<CanChangeValue, _Key&, const _Key&> get(const _Key& key) {
 		node* cur = root;
 		while (cur != nullptr) {
 
