@@ -147,6 +147,7 @@
     <ClInclude Include="exception.h" />
     <ClInclude Include="HashDictionary.h" />
     <ClInclude Include="HashTable.h" />
+    <ClInclude Include="Histogram.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="RBTree.h" />
   </ItemGroup>

@@ -7,6 +7,7 @@
 #include "Dictionary.h"
 #include "HashDictionary.h"
 #include <unordered_map>
+#include "Histogram.h"
 
 using namespace std;
 
@@ -43,8 +44,14 @@ struct my_hash {
 	}
 };
 
-
 int main() {
 	srand(time(0));
+	Histogram<int, int> hist({ 1,5,10,15 });
+	hist.add(1);
+	hist.add(1);
+	hist.add(2);
+	hist.add(20);
+	hist.add(11);
+	hist.print();
 	return 0;
 }

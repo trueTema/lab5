@@ -35,7 +35,6 @@ public:
 		T data;
 		Item(const T& newdata) : data(newdata) {}
 		Item() = default;
-		~Item() = default;
 	};
 	struct List {
 		Item* head = nullptr;
@@ -61,9 +60,12 @@ public:
 	}
 
 	void clear() {
+		if (items == nullptr) return;
 		Item* cur = items->head;
 		while (cur != nullptr) {
 			Item* cur2 = cur->next;
+			if (cur2 != nullptr)
+			cur2->prev = nullptr;
 			delete cur;
 			cur = cur2;
 		}
@@ -217,10 +219,18 @@ public:
 	using iterator = BidirectionalIterator<T, false>;
 	using const_iterator = BidirectionalIterator<T, true>;
 	iterator begin() {
+		if (items->head == nullptr) {
+			iterator iter(this->items->tail, this);
+			return iter;
+		}
 		iterator iter(this->items->head, this);
 		return iter;
 	}
 	const_iterator cbegin() {
+		if (items->head == nullptr) {
+			const_iterator iter(this->items->tail, this);
+			return iter;
+		}
 		const_iterator iter(this->items->head, this);
 		return iter;
 	}
@@ -239,6 +249,7 @@ public:
 	LinkedList(T*, int);
 	LinkedList(const LinkedList<T>&);
 	LinkedList(std::initializer_list<T>);
+	LinkedList(LinkedList<T>&&);
 
 	//деконструктор
 	~LinkedList();
@@ -264,6 +275,34 @@ public:
 	T& operator[](int);
 	bool operator==(LinkedList<T>&);
 	bool operator!=(LinkedList<T>&);
+
+	LinkedList<T>& operator=(const LinkedList<T>& other) {
+		if (this != &other) {
+			clear();
+			if (!items)
+				delete items;
+			items = CreateList();
+			for (Item* it = other.items->head; it != other.items->tail; it = it->next) {
+				this->push_back(it->data);
+			}
+			size = other.size;
+		}
+		return *this;
+	}
+
+	LinkedList<T>& operator=(LinkedList<T>&& other) {
+		if (this != &other) {
+			clear();
+			if (!items)
+				delete items;
+			this->items = other.items;
+			size = other.size;
+			other.items = nullptr;
+			other.size = 0;
+		}
+		
+		return *this;
+	}
 };
 
 
@@ -272,7 +311,7 @@ class BidirectionalIterator {
 	template<typename T> friend class LinkedList;
 	template<typename T, class _Iterators> friend class Merge_Sort;
 protected:
-	using type = std::conditional_t<IsConst, const T, T>;
+	using type = std::conditional_t<IsConst, const T&, T&>;
 	typename LinkedList<T>::Item* item = nullptr;
 	LinkedList<T>* arr = nullptr;
 public:
@@ -282,7 +321,7 @@ public:
 	BidirectionalIterator(const BidirectionalIterator<T, IsConst>& other) : arr(other.arr) {
 		this->item = &(*other.item);
 	}
-	type& operator *() {
+	type operator *() {
 		return item->data;
 	}
 	BidirectionalIterator<T, IsConst>& operator++() {
@@ -352,6 +391,7 @@ public:
 template<class T>
 LinkedList<T>::LinkedList() {
 	items = CreateList();
+	items->tail = new Item();
 }
 
 template<class T>
@@ -372,13 +412,21 @@ LinkedList<T>::LinkedList(T* items, int count) {
 	size = count;
 }
 template<class T>
-LinkedList<T>::LinkedList(const LinkedList<T>& LL) {
+LinkedList<T>::LinkedList(const LinkedList<T>& other) {
 	items = CreateList();
 	
-	for (Item* cur = LL.items->head; cur != nullptr; cur = cur->next) {
-		this->push_back(cur->data);
+	for (Item* it = other.items->head; it != nullptr &&  it != other.items->tail; it = it->next) {
+		this->push_back(it->data);
 	}
-	size = LL.size;
+	size = other.size;
+}
+
+template<class T>
+LinkedList<T>::LinkedList(LinkedList<T>&& other) : items(nullptr), size(0) {
+	items = other.items;
+	size = other.size;
+	other.items = nullptr;
+	other.size = 0;
 }
 
 template<class T>

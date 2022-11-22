@@ -119,9 +119,9 @@ public:
 	DynamicArray();
 	DynamicArray(size_t, T);
 	DynamicArray(T*, int);
-	DynamicArray(DynamicArray<T>*);
 	DynamicArray(const DynamicArray<T>&);
-	DynamicArray(std::initializer_list<T>);
+	DynamicArray(DynamicArray<T>&&);
+	DynamicArray(const std::initializer_list<T>&);
 
 	//деконструктор
 	~DynamicArray();
@@ -148,6 +148,28 @@ public:
 	T& operator[] (int index);
 	bool operator==(DynamicArray<T>& seq);
 	bool operator!=(DynamicArray<T>& seq);
+
+	DynamicArray<T>& operator=(const DynamicArray<T>& other) {
+		if (this != &other) {
+			this->items = reinterpret_cast<T*>(new char[(other.size) * sizeof(T)]);
+			size = other.size;
+			used_items = other.used_items;
+			memcpy(this->items, other.items, size * sizeof(T));
+		}
+		return *this;
+	}
+
+	DynamicArray<T>& operator=(DynamicArray<T>&& other) {
+		if (this != &other) {
+			this->items = other.items;
+			this->size = other.size;
+			this->used_items = other.used_items;
+			other.items = nullptr;
+			other.size = 0;
+			other.used_items = 0;
+		}
+		return *this;
+	}
 };
 
 
@@ -186,8 +208,18 @@ DynamicArray<T>::DynamicArray(const DynamicArray<T>& dynamic_array) {
 	memcpy(this->items, dynamic_array.items, size * sizeof(T));
 }
 
+template <class T>
+DynamicArray<T>::DynamicArray(DynamicArray<T>&& other) {
+	items = other.items;
+	size = other.size;
+	used_items = other.used_items;
+	other.items = nullptr;
+	other.size = 0;
+	other.used_items = 0;
+}
+
 template<class T>
-DynamicArray<T>::DynamicArray(std::initializer_list<T> list) : DynamicArray(list.size(), T()) {
+DynamicArray<T>::DynamicArray(const std::initializer_list<T>& list) : DynamicArray(list.size(), T()) {
 	int j = 0;
 	for (auto i : list) {
 		this->items[j] = i;

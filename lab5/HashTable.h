@@ -84,9 +84,16 @@ public:
 		return *it_res;
 	}
 
+
 	HashTable(const HashTable<_Key, _Value, CanChangeValue, _Hash, _cmp>& other) : HashList(other.HashList), HashVector(other.HashVector) {
 		this->size = other.size;
 		this->hash_capacity = other.hash_capacity;
+	}
+
+	void reserve(size_t n) {
+		size_t required_size = size_t((double)n / max_load_factor) + 1;
+		this->rehash(required_size);
+		return;
 	}
 
 	void insert(const _Key& key, const _Value& value) {
@@ -123,14 +130,16 @@ public:
 		throw SetException(NoSuchElement);
 	}
 
-	std::conditional_t<CanChangeValue, _Value&, const _Value&> find(const _Key& key) {
+	iterator find(const _Key& key) {
 		size_t hash = hasher(key);
 		for (typename LinkedList<Elem>::iterator it = HashVector[hash % hash_capacity]; it != HashList.end() && (*it).tmp_hash == (hash % hash_capacity); it++) {
 			if (comparator((*it).data.first, key)) {
-				return (*it).data.second;
+				typename LinkedList<Elem>::iterator* it_x = new typename LinkedList<Elem>::iterator(it);
+				iterator* it_res = reinterpret_cast<iterator*>(it_x);
+				return *it_res;
 			}
 		}
-		throw SetException(NoSuchElement);
+		return this->end();
 	}
 
 	size_t capacity() const noexcept {
@@ -149,17 +158,13 @@ public:
 	}
 
 	std::conditional_t<CanChangeValue, _Value&, const _Value&> operator[](const _Key& key) {
-		try {
-			return this->find(key);
+		iterator it = find(key);
+		if (it != this->end()) {
+			return (*it).second;
 		}
-		catch (SetException e) {
-			if (e.id == NoSuchElement) {
-				this->insert(key, _Value());
-				return this->find(key);
-			}
-			else {
-				throw e;
-			}
+		else {
+			this->insert(key, _Value());
+			return (*find(key)).second;
 		}
 	}
 };
