@@ -8,6 +8,7 @@
 #include "HashDictionary.h"
 #include <unordered_map>
 #include "Histogram.h"
+#include "Set.h"
 
 using namespace std;
 
@@ -44,14 +45,23 @@ struct my_hash {
 	}
 };
 
+struct MyKey {
+public:
+	const char& operator ()(const string& x) const noexcept {
+		return x[0];
+	}
+};
+
 int main() {
 	srand(time(0));
-	Histogram<int, int> hist({ 1,5,10,15 });
-	hist.add(1);
-	hist.add(1);
-	hist.add(2);
-	hist.add(20);
-	hist.add(11);
+	Histogram<string, char, MyKey> hist({ 'a','b','c' });
+	hist.add("aa");
+	hist.add("abd");
+	hist.add("asd");
+	hist.add("bdsa");
+	hist.add("ff");
+	hist.add("cc");
 	hist.print();
+	hist.describe();
 	return 0;
 }

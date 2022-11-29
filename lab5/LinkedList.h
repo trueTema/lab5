@@ -258,7 +258,7 @@ public:
 	T& GetFirst();
 	T& GetLast();
 	T& Get(int);
-	int GetLength();
+	int GetLength() const;
 	void Append(T);
 	void Prepend(T);
 	void Set(int, T);
@@ -278,9 +278,9 @@ public:
 
 	LinkedList<T>& operator=(const LinkedList<T>& other) {
 		if (this != &other) {
-			clear();
+			/*clear();
 			if (!items)
-				delete items;
+				delete items;*/
 			items = CreateList();
 			for (Item* it = other.items->head; it != other.items->tail; it = it->next) {
 				this->push_back(it->data);
@@ -444,6 +444,7 @@ template<class T>
 LinkedList<T>::~LinkedList() {
 	clear();
 	delete items;
+	items = nullptr;
 }
 
 //функции
@@ -463,7 +464,7 @@ T& LinkedList<T>::Get(int index) {
 }
 
 template<class T>
-int LinkedList<T>::GetLength() {
+int LinkedList<T>::GetLength() const {
 	return size;
 }
 
