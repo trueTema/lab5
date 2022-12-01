@@ -14,7 +14,7 @@ struct MyComparator {
 template<typename _Key, typename _Value, bool CanChangeValue = true, bool IsMulti = false, class _cmp = MyComparator<_Key>>
 class RBTree {
 protected:
-	template<typename _Key, typename _Value, bool CanChangeValue, bool IsMulti, class _cmp>
+	template<typename _Key, typename _Value, bool CanChangeValue, bool IsMulti, class _cmp, bool IsConst>
 	friend class RBTIterator;
 	_cmp comparator;
 	enum _color { BLACK, RED, None };
@@ -36,6 +36,7 @@ protected:
 			right = other.right;
 			parent = other.parent;
 		}
+		node(const node* other) : data(other->data) {}
 		node(const _Key& key, const _Value& value, const _color& color) : data(key, LinkedList<_Value>()) {
 			this->color = color;
 			data.second.Append(value);
@@ -245,6 +246,18 @@ protected:
 		return;
 	}
 
+	void move_node(node* first, node* second) {
+		node* parent = first->parent;
+		node* left = first->left;
+		node* right = first->right;
+		_color clr = first->color;
+		first = new node(second);
+		first->left = left;
+		first->right = right;
+		first->parent = parent;
+		first->color = clr;
+	}
+
 	void delete_node(node* cur) noexcept {
 		
 		//0 children
@@ -293,12 +306,13 @@ protected:
 			
 			//black node deleting
 			if (cur->right != nullptr) {
-				cur -> key = cur->right->key;
+				move_node(cur, cur->right);
 				delete_node(cur->right);
 				return;
 			}
 			else {
-				cur->key = cur->left->key;
+				move_node(cur, cur->left);
+
 				delete_node(cur->left);
 				return;
 			}
@@ -306,7 +320,7 @@ protected:
 
 		//2 children
 		node* nearest = nearest_key(cur);
-		cur->key = nearest->key;
+		move_node(cur, nearest);
 		delete_node(nearest);
 		return;
 	}
@@ -358,7 +372,8 @@ protected:
 		return cur->data.second.GetLength() + count(cur->right) + count(cur->left);
 	}
 public:
-	using iterator = typename RBTIterator<_Key, _Value, CanChangeValue, IsMulti, _cmp>;
+	using iterator = typename RBTIterator<_Key, _Value, CanChangeValue, IsMulti, _cmp, false>;
+	using const_iterator = typename RBTIterator<_Key, _Value, CanChangeValue, IsMulti, _cmp, true>;
 	iterator begin() {
 		typename LinkedList<node*>::iterator* it = new typename LinkedList<node*>::iterator(traversal_order.begin());
 		iterator* it_res = reinterpret_cast<iterator*>(it);
@@ -368,6 +383,18 @@ public:
 	iterator end() {
 		typename LinkedList<node*>::iterator* it = new typename LinkedList<node*>::iterator(traversal_order.end());
 		iterator* it_res = reinterpret_cast<iterator*>(it);
+		return *it_res;
+	}
+
+	const_iterator cbegin() {
+		typename LinkedList<node*>::const_iterator* it = new typename LinkedList<node*>::const_iterator(traversal_order.cbegin());
+		const_iterator* it_res = reinterpret_cast<const_iterator*>(it);
+		return *it_res;
+	}
+
+	const_iterator cend() {
+		typename LinkedList<node*>::const_iterator* it = new typename LinkedList<node*>::const_iterator(traversal_order.cend());
+		const_iterator* it_res = reinterpret_cast<const_iterator*>(it);
 		return *it_res;
 	}
 	RBTree() : traversal_order() {
@@ -533,7 +560,7 @@ public:
 
 	void clear() {
 		_size = 0;
-		clear();
+		clear(root);
 		root = nullptr;
 	}
 
@@ -553,13 +580,13 @@ public:
 	}
 };
 
-template<typename _Key, typename _Value, bool CanChangeValue = true, bool IsMulti = false, class _cmp = MyComparator<_Key>>
+template<typename _Key, typename _Value, bool CanChangeValue, bool IsMulti, class _cmp, bool IsConst>
 class RBTIterator : public BidirectionalIterator<typename RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>::node*, true> {
 private:
 	using thisiterator = BidirectionalIterator<typename RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>::node*, true>;
 public:
 	RBTIterator(const RBTIterator& other) : thisiterator(other) {}
-	std::conditional_t<CanChangeValue, std::pair <const _Key, LinkedList<_Value>>&, const std::pair <const _Key, LinkedList<_Value>>&> operator*() {
+	std::conditional_t<CanChangeValue && !IsConst, std::pair <const _Key, LinkedList<_Value>>&, const std::pair <const _Key, LinkedList<_Value>>&> operator*() {
 		return this->item->data->data;
 	}
 };

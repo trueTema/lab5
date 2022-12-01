@@ -5,6 +5,7 @@ template<typename _Key, typename _Value, class _cmp = MyComparator<_Key>>
 class Dictionary : public RBTree<_Key, _Value, true, false, _cmp> {
 public:
 	using iterator = typename RBTree<_Key, _Value, true, false, _cmp>::iterator;
+	using const_iterator = typename RBTree<_Key, _Value, true, false, _cmp>::const_iterator;
 	Dictionary() : RBTree<_Key, _Value, true, false, _cmp>() {}
 	Dictionary(const Dictionary<_Key, _Value, _cmp>& other) : RBTree<_Key, _Value, true, false, _cmp>(other) {
 	}

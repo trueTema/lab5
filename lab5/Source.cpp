@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include "Histogram.h"
 #include "Set.h"
+#include "alphabet_pointer.h"
 
 using namespace std;
 
@@ -53,15 +54,11 @@ public:
 };
 
 int main() {
+	setlocale(LC_ALL, "Russian");
 	srand(time(0));
-	Histogram<string, char, MyKey> hist({ 'a','b','c' });
-	hist.add("aa");
-	hist.add("abd");
-	hist.add("asd");
-	hist.add("bdsa");
-	hist.add("ff");
-	hist.add("cc");
-	hist.print();
-	hist.describe();
+	APointer a("привет, меня зовут артём. давай знакомиться?", 2);
+	a.add("\n- А меня гена!");
+	a.remove("меня");
+	a.print();
 	return 0;
 }
