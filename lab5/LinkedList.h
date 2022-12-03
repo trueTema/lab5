@@ -278,9 +278,10 @@ public:
 
 	LinkedList<T>& operator=(const LinkedList<T>& other) {
 		if (this != &other) {
-			/*clear();
+			clear();
 			if (!items)
-				delete items;*/
+				delete items;
+			size = 0;
 			items = CreateList();
 			for (Item* it = other.items->head; it != other.items->tail; it = it->next) {
 				this->push_back(it->data);
@@ -315,6 +316,7 @@ protected:
 	typename LinkedList<T>::Item* item = nullptr;
 	LinkedList<T>* arr = nullptr;
 public:
+	BidirectionalIterator() = default;
 	BidirectionalIterator(typename LinkedList<T>::Item* item, LinkedList<T>* arr) : arr(arr) {
 		this->item = &(*item);
 	}

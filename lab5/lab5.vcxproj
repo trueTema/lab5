@@ -152,6 +152,7 @@
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="RBTree.h" />
     <ClInclude Include="Set.h" />
+    <ClInclude Include="Sparse_matrix.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

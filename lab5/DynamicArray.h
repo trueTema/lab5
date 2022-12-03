@@ -29,6 +29,7 @@ private:
 	using type = std::conditional_t<IsConst, const T, T>;
 	DynamicArray<T>* arr = nullptr;
 public:
+	RandomAccessIterator() = default;
 	RandomAccessIterator(size_t pos, DynamicArray<T>* arr) : arr(arr) {
 		cur_pos = pos;
 	}
@@ -128,7 +129,8 @@ public:
 
 	//геттеры
 	T& Get(int);
-	int GetSize();
+	const T& c_get(int index);
+	int GetSize() const;
 
 	//операции
 	void Set(int, T);
@@ -182,8 +184,7 @@ DynamicArray<T>::DynamicArray() {
 template <class T>
 DynamicArray<T>::DynamicArray(size_t count, T fill) {
 	if (count < 0) throw SetException(SizeBelowZero);
-	items = reinterpret_cast<T*>(new char[(count + 1) * 2 * sizeof(T)]);
-	size = count * 2;
+	Rebuf(count);
 	used_items = count;
 	for (int i = 0; i < count; i++) {
 		items[i] = fill;
@@ -192,8 +193,7 @@ DynamicArray<T>::DynamicArray(size_t count, T fill) {
 template <class T>
 DynamicArray<T>::DynamicArray(T* items, int count) {
 	if (count < 0) throw SetException(SizeBelowZero);
-	this->items = reinterpret_cast<T*>(new char[(count + 1) * 2 * sizeof(T)]);;
-	size = (count + 1) * 2;
+	Rebuf(count);
 	used_items = count;
 	for (int i = 0; i < count; i++) {
 		this->items[i] = items[i];
@@ -202,8 +202,7 @@ DynamicArray<T>::DynamicArray(T* items, int count) {
 
 template <class T>
 DynamicArray<T>::DynamicArray(const DynamicArray<T>& dynamic_array) {
-	items = reinterpret_cast<T*>(new char[(dynamic_array.size) * sizeof(T)]);
-	size = dynamic_array.size;
+	Rebuf(dynamic_array.size);
 	used_items = dynamic_array.used_items;
 	memcpy(this->items, dynamic_array.items, size * sizeof(T));
 }
@@ -243,6 +242,13 @@ T& DynamicArray<T>::Get(int index) {
 	return items[index];
 }
 
+template <class T>
+const T& DynamicArray<T>::c_get(int index) {
+	if (index >= used_items || index < 0) {
+		throw SetException(IndexOutOfRange);
+	}
+	return items[index];
+}
 
 //операции
 
@@ -253,7 +259,7 @@ void DynamicArray<T>::Rebuf(int NewSize) {
 		throw SetException(SizeBelowZero);
 	}
 	try {
-		T* items_cur = reinterpret_cast<T*>(new char[NewSize * sizeof(T)]);
+		T* items_cur = new T[NewSize];
 		size_t cpy_num = NewSize > size ? size : NewSize;
 		memcpy(items_cur, items, cpy_num * sizeof(T));
 		delete[] items;
@@ -411,7 +417,7 @@ bool DynamicArray<T>::operator!=(DynamicArray<T>& seq) {
 }
 
 template<class T>
-int DynamicArray<T>::GetSize() {
+int DynamicArray<T>::GetSize() const {
 	return used_items;
 }
 

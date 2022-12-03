@@ -3,7 +3,7 @@
 #include <string>
 enum except_type { MemoryAllocateError, IndexOutOfRange, SizeBelowZero, NegativeRange, 
 	IncorrectComparator, IncorrectRange, IncorrectValue, IncorrectInputFormat, IncorrectIterator, 
-	NoRequiredArgument, UnknownFlag, UnknownCommand, NoSuchElement, MutuallyExclusive, TooManySort, EmptySequence};
+	NoRequiredArgument, UnknownFlag, UnknownCommand, NoSuchElement, IncorrectArraySize, MutuallyExclusive, TooManySort, EmptySequence};
 #include<iostream>
 
 class SetException {
@@ -15,6 +15,7 @@ public:
 		if (id == IndexOutOfRange) return "Subscirpt index out of range";
 		if (id == SizeBelowZero) return "Size below zero";
 		if (id == NegativeRange) return "Range is less than zero";
+		if (id == IncorrectArraySize) return "Range of array isn't correct";
 		if (id == IncorrectComparator) return "Incorrect sorting comparator";
 		if (id == IncorrectRange) return "The size of sequence isn't a power of 2";
 		if (id == IncorrectValue) return "Not allowed parameter value";

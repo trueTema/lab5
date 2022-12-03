@@ -10,26 +10,13 @@
 #include "Histogram.h"
 #include "Set.h"
 #include "alphabet_pointer.h"
+#include "Sparse_matrix.h"
 
 using namespace std;
 
 
 size_t __hash(int x) {
 	return x % 1;
-}
-
-struct x {
-	int a;
-	x(int a) {
-		this->a = a;
-	}
-	x() = default;
-	friend ostream& operator<<(ostream& os, const x& a);
-};
-
-ostream& operator<<(ostream& os, const x& a) {
-	os << a.a;
-	return os;
 }
 
 template<typename T>
@@ -53,12 +40,16 @@ public:
 	}
 };
 
+
+
+
 int main() {
 	setlocale(LC_ALL, "Russian");
 	srand(time(0));
-	APointer a("привет, меня зовут артём. давай знакомиться?", 2);
-	a.add("\n- А меня гена!");
-	a.remove("меня");
-	a.print();
+	DynamicArray<DynamicArray<int>> d = { {1,2,3}, {0,2,0}, {1,2,3} };
+	sparse_matrix<int> mat = { { -5 , 7 , 29 }, { -65 , -97 , -83 } };
+	sparse_matrix<int> mat2 = { {-68, 69 }, { 95, 29 }, { 56, -13 } };
+	mat *= mat2;
+	cout << mat;
 	return 0;
 }

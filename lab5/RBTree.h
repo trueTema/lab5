@@ -405,6 +405,13 @@ public:
 		root = new node(*other.root);
 		_size = other._size;
 		make_tree(root, other.root);
+		traversal_order = other.traversal_order;
+	}
+	RBTree(RBTree<_Key, _Value>&& other) {
+		root = other.root;
+		_size = other._size;
+		traversal_order = other.traversal_order;
+		other.root = nullptr;
 	}
 	~RBTree(){
 		clear(root);
@@ -556,6 +563,22 @@ public:
 	}
 	bool operator!=(const RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>& other) const noexcept {
 		return !this->Equals(other);
+	}
+
+	RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>& operator=(const RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>& other) {
+		root = new node(*other.root);
+		_size = other._size;
+		make_tree(root, other.root);
+		traversal_order = other.traversal_order;
+		return *this;
+	}
+
+	RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>& operator=(RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>&& other) {
+		root = other.root;
+		_size = other._size;
+		traversal_order = other.traversal_order;
+		other.root = nullptr;
+		return *this;
 	}
 
 	void clear() {

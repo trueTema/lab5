@@ -62,17 +62,8 @@ public:
 		this->median = other.median;
 		return *this;
 	}
-	void print() {
-		try {
-			calculate();
-		}
-		catch (SetException e) {
-			if (e.id != EmptySequence) {
-				throw e;
-			}
-		}
-		std::cout << "Min: " << min << " Max: " << max << " Median: " << median << " Count: " << count << "\n";
-	}
+	template<class _O, typename _K, class _Ky, class _C>
+	friend std::ostream& operator <<(std::ostream& os, const statistics<_O, _K, _Ky, _C>);
 };
 template<class _Obj, class _Key, class _cmp>
 struct statistics<_Obj, int, _Key, _cmp> {
@@ -125,17 +116,6 @@ public:
 		this->average = other.average;
 		this->median = other.median;
 		return *this;
-	}
-	void print() {
-		try {
-			calculate();
-		}
-		catch (SetException e) {
-			if (e.id != EmptySequence) {
-				throw e;
-			}
-		}
-		std::cout << "Min: " << min << " Max: " << max << " Median: " << median << " Count: " << count << " Average: " << average << "\n";
 	}
 };
 template<class _Obj, class _Key, class _cmp>
@@ -202,6 +182,48 @@ public:
 	}
 };
 
+template<class _O, typename _K, class _Ky, class _C>
+std::ostream& operator <<(std::ostream& os, statistics<_O, _K, _Ky, _C>& st) {
+	try {
+		st.calculate();
+	}
+	catch (SetException e) {
+		if (e.id != EmptySequence) {
+			throw e;
+		}
+	}
+	os << "Min: " << st.min << " Max: " << st.max << " Median: " << st.median << " Count: " << st.count << "\n";
+	return os;
+}
+
+template<class _O, class _Ky, class _C>
+std::ostream& operator <<(std::ostream& os, statistics<_O, int, _Ky, _C>& st) {
+	try {
+		st.calculate();
+	}
+	catch (SetException e) {
+		if (e.id != EmptySequence) {
+			throw e;
+		}
+	}
+	os << "Min: " << st.min << " Max: " << st.max << " Median: " << st.median << " Count: " << st.count << " Average: " << st.average << "\n";
+	return os;
+}
+
+template<class _O, class _Ky, class _C>
+std::ostream& operator <<(std::ostream& os, statistics<_O, double, _Ky, _C>& st) {
+	try {
+		st.calculate();
+	}
+	catch (SetException e) {
+		if (e.id != EmptySequence) {
+			throw e;
+		}
+	}
+	os << "Min: " << st.min << " Max: " << st.max << " Median: " << st.median << " Count: " << st.count << " Average: " << st.average << "\n";
+	return os;
+}
+
 template<class _Obj, typename _KeyType = _Obj, class _Key = MyKeyGetter<_Obj>, class _cmp = MyComparator<_KeyType>>
 class Histogram {
 private:
@@ -217,7 +239,7 @@ private:
 		int left = -1;
 		int right = bins.GetSize();
 		int ans = (left + right) / 2;
-		while (left < right) {
+		while (left <= right) {
 			int mid = (left + right) / 2;
 			if (comparator(key, bins[mid]) == 0) {
 				if (mid == bins.GetSize() - 1) mid--;
@@ -260,7 +282,6 @@ public:
 		}
 	}
 	~Histogram() = default;
-	//void plot(); //??????????????????????????????????????????
 
 	void print() {
 		std::cout << "\tRange\tObjects\n\n\n";
@@ -275,15 +296,21 @@ public:
 		}
 	}
 
+
+	template<class _O, typename _K, class _Ky, class _C>
+	friend std::ostream& operator<<(std::ostream&, Histogram<_O, _K, _Ky, _C>&);
+
 	void describe() {
 		std::cout << "\tRange\tStatistics\n\n\n";
-		for (int it = 0; it < bins.GetSize() - 1; it++) {
-			std::cout << "\t" << bins[it] << " - " << bins[it + 1] << "\t";
-			//for (int i = 0; i < stats.size(); i++) {
-				stats[it].print();
-			//}
+		for (int it = 0; it < (bins).GetSize() - 1; it++) {
+			std::cout << "\t" << (bins)[it] << " - " << (bins)[it + 1] << "\t";
+			std::cout << (stats)[it];
 			std::cout << "\n\n";
 		}
+	}
+
+	const std::vector<statistics<_Obj, _KeyType, _Key, _cmp>>& get_stats() const noexcept {
+		return stats;
 	}
 
 	void add(const _Obj& object) {
@@ -299,3 +326,18 @@ public:
 		stats[pos].remove(object);
 	}
 };
+
+template<class _O, typename _K, class _Ky, class _C>
+std::ostream& operator<<(std::ostream& os, Histogram<_O, _K, _Ky, _C>& hist) {
+	os << "\tRange\tObjects\n\n\n";
+	for (typename DynamicArray<_K>::const_iterator it = hist.bins.cbegin(); it != (hist.bins.cend() - 1); it++) {
+		os << "\t" << *it << " - " << *(it + 1) << "\t";
+		for (typename LinkedList<_O>::const_iterator it_l = hist.hd[*it].cbegin(); it_l != hist.hd[*it].cend(); it_l++) {
+			os << *it_l;
+			if (it_l != (hist.hd[*it].cend() - 1)) os << ",";
+			os << " ";
+		}
+		os << "\n\n";
+	}
+	return os;
+}

@@ -3,18 +3,19 @@
 #include <string>
 #include "Dictionary.h"
 
+template<bool IsWords = true>
 class APointer {
 private:
 	Dictionary<std::string, LinkedList<size_t>> dict;
 	std::string text;
-	const std::string restricted = "!\"#$%&’()*+,-./:;<=>?@[]^_`{|}~. \n\t";
+	const std::string restricted = "!\"#$%&’()*+,-./:;<=>?@[]^_`{|}~.";
 	const size_t page_size;
 	size_t page_num = 1;
 	LinkedList<std::string>* split(const std::string::const_iterator& begin, const std::string::const_iterator& end) const noexcept {
 		LinkedList<std::string>* list = new LinkedList<std::string>();
 		for (std::string::const_iterator it = begin; it != end; it++) {
-			if (restricted.find(*it) != std::string::npos) {
-				while (it != end && restricted.find(*it) != std::string::npos) it++;
+			if (*it == ' ' || *it == '\n' || *it == '\t') {
+				while (it != end && (*it == ' ' || *it == '\n' || *it == '\t')) it++;
 				if (it == end) return list;
 				list->Append(std::string());
 			}
@@ -25,15 +26,37 @@ private:
 		}
 		return list;
 	}
+
+	void delete_restricted(std::string& str) {
+		for (std::string::iterator it = str.begin(); it != str.end(); it++) {
+			if (restricted.find(*it) != std::string::npos) {
+				it--;
+				str.erase(it + 1);
+			}
+		}
+	}
+
 	void place_to_dict(LinkedList<std::string>* w_list) {
 		size_t cur_size = 0;
-		for (LinkedList<std::string>::const_iterator it = w_list->cbegin(); it != w_list->cend(); it++) {
-			dict[*it].Append(page_num);
-			cur_size++;
-			if (cur_size >= page_size) {
-				page_num++;
-				cur_size = 0;
+		for (LinkedList<std::string>::iterator it = w_list->begin(); it != w_list->end(); it++) {
+			if (!IsWords) {
+				if ((*it).size() > (page_num == 1 ? page_size / 2 : page_num % 10 == 0 ? page_size*3/4:page_size) && cur_size == 0) page_num--;
+				cur_size += (*it).size();
+				if (cur_size > (page_num == 1 ? page_size / 2 : page_num % 10 == 0 ? page_size * 3 / 4 : page_size)) {
+					page_num++;
+					cur_size = (*it).size();
+				}
+				else cur_size++;
 			}
+			else {
+				cur_size += 1;
+				if (cur_size > (page_num == 1 ? page_size / 2 : page_num % 10 == 0 ? page_size * 3 / 4 : page_size)) {
+					page_num++;
+					cur_size = 1;
+				}
+			}
+			delete_restricted(*it);
+			dict[*it].Append(page_num);
 		}
 	}
 public:
