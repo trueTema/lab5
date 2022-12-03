@@ -27,7 +27,7 @@ class LinkedList
 {
 	template<typename V, bool X>
 	friend class BidirectionalIterator;
-public:
+private:
 	int size = 0;
 	struct Item {
 		Item* next = nullptr;
@@ -59,20 +59,7 @@ public:
 		return list;
 	}
 
-	void clear() {
-		if (items == nullptr) return;
-		Item* cur = items->head;
-		while (cur != nullptr) {
-			Item* cur2 = cur->next;
-			if (cur2 != nullptr)
-			cur2->prev = nullptr;
-			delete cur;
-			cur = cur2;
-		}
-		items->head = nullptr;
-		items->tail = nullptr;
-		size = 0;
-	}
+
 
 	void push_back(T data) {
 		Item* cur;
@@ -268,13 +255,26 @@ public:
 	void del_item(iterator&);
 	iterator find(iterator, iterator, T);
 	LinkedList<T>* SplitList(bool(T));
-	bool Equals(LinkedList<T>*);
+	bool Equals(const LinkedList<T>&) const;
 	bool IsSubList(LinkedList<T>*);
-
+	void clear() {
+		if (items == nullptr) return;
+		Item* cur = items->head;
+		while (cur != nullptr) {
+			Item* cur2 = cur->next;
+			if (cur2 != nullptr)
+				cur2->prev = nullptr;
+			delete cur;
+			cur = cur2;
+		}
+		items->head = nullptr;
+		items->tail = nullptr;
+		size = 0;
+	}
 	//операторы
 	T& operator[](int);
-	bool operator==(LinkedList<T>&);
-	bool operator!=(LinkedList<T>&);
+	bool operator==(const LinkedList<T>&) const;
+	bool operator!=(const LinkedList<T>&) const;
 
 	LinkedList<T>& operator=(const LinkedList<T>& other) {
 		if (this != &other) {
@@ -544,10 +544,12 @@ LinkedList<T>* LinkedList<T>::SplitList(bool cmp(T)) {
 }
 
 template<class T>
-bool LinkedList<T>::Equals(LinkedList<T>* seq) {
-	if (this->GetLength() != seq->GetLength()) return false;
-	for (int i = 0; i < seq->GetLength(); i++) {
-		if (this->Get(i) != seq->Get(i)) return false;
+bool LinkedList<T>::Equals(const LinkedList<T>& seq) const {
+	if (this->GetLength() != seq.GetLength()) return false;
+	Item* i = this->items->head;
+	Item* j = seq.items->head;
+	for (; i != this->items->tail && j != seq.items->tail; i = i->next, j = j->next) {
+		if (i->data != j->data) return false;
 	}
 	return true;
 }
@@ -568,11 +570,11 @@ T& LinkedList<T>:: operator[](int index) {
 }
 
 template<class T>
-bool LinkedList<T>:: operator==(LinkedList<T>& seq) {
-	return this->Equals(&seq);
+bool LinkedList<T>:: operator==(const LinkedList<T>& seq) const {
+	return this->Equals(seq);
 }
 
 template<class T>
-bool LinkedList<T>:: operator!=(LinkedList<T>& seq) {
-	return !this->Equals(&seq);
+bool LinkedList<T>:: operator!=(const LinkedList<T>& seq) const {
+	return !this->Equals(seq);
 }

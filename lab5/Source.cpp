@@ -46,10 +46,8 @@ public:
 int main() {
 	setlocale(LC_ALL, "Russian");
 	srand(time(0));
-	DynamicArray<DynamicArray<int>> d = { {1,2,3}, {0,2,0}, {1,2,3} };
-	sparse_matrix<int> mat = { { -5 , 7 , 29 }, { -65 , -97 , -83 } };
-	sparse_matrix<int> mat2 = { {-68, 69 }, { 95, 29 }, { 56, -13 } };
-	mat *= mat2;
-	cout << mat;
+	Dictionary<int, int> d1;
+	Dictionary<int, int> d2 = d1;
+	cout << (d1 == d2);
 	return 0;
 }

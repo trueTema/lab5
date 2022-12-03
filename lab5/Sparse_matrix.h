@@ -13,7 +13,6 @@ public:
 		this->hor = hor;
 		this->ver = ver;
 	}
-
 	sparse_matrix(const std::initializer_list<std::initializer_list<T>>& list) {
 		this->hor = list.size();
 		this->ver = (*list.begin()).size();
@@ -131,6 +130,14 @@ public:
 		other.hor = 0;
 		other.ver = 0;
 		return *this;
+	}
+
+	bool operator==(sparse_matrix<T>& other) {
+		return hor == other.hor && ver == other.ver && matrix == other.matrix;
+	}
+
+	bool operator!=(sparse_matrix<T>& other) {
+		return !(hor == other.hor && ver == other.ver && matrix == other.matrix);
 	}
 
 	template<typename U>

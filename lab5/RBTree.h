@@ -341,23 +341,26 @@ protected:
 
 	bool Equals(const node* cur, const node* other) const noexcept {
 		if (cur == other && cur == nullptr) return true;
-		if (cur->data != other->data) return false;
+		if (cur == nullptr) return false;
+		if (other == nullptr) return false;
+		if (cur->data.first != other->data.first) return false;
+		if (cur->data.second != other->data.second) return false;
 		if (cur->color != other->color) return false;
 		return Equals(cur->left, other->left) && Equals(cur->right, other->right);
 	}
 
 	void fix_traversal_order(node* cur) {
 		if (cur->left == nullptr && cur->right == nullptr) {
-			traversal_order.push_back(cur);
+			traversal_order.Append(cur);
 			return;
 		}
 		if (cur->left == nullptr) {
-			traversal_order.push_back(cur);
+			traversal_order.Append(cur);
 			fix_traversal_order(cur->right);
 			return;
 		}
 		fix_traversal_order(cur->left);
-		traversal_order.push_back(cur);
+		traversal_order.Append(cur);
 		if (cur->right != nullptr)
 			fix_traversal_order(cur->right);
 	}
@@ -402,6 +405,7 @@ public:
 		_size = 0;
 	}
 	RBTree(const RBTree<_Key, _Value>& other) : traversal_order() {
+		if (other.root == nullptr) return;
 		root = new node(*other.root);
 		_size = other._size;
 		make_tree(root, other.root);
@@ -566,6 +570,7 @@ public:
 	}
 
 	RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>& operator=(const RBTree<_Key, _Value, CanChangeValue, IsMulti, _cmp>& other) {
+		if (other.root == nullptr) return *this;
 		root = new node(*other.root);
 		_size = other._size;
 		make_tree(root, other.root);
