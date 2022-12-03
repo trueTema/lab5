@@ -246,16 +246,33 @@ protected:
 		return;
 	}
 
-	void move_node(node* first, node* second) {
+	node* move_node(node* first, node* second) {
 		node* parent = first->parent;
 		node* left = first->left;
 		node* right = first->right;
 		_color clr = first->color;
+		bool check = (first -> parent) == nullptr;
+		bool isright = isRight(first);
+		delete first;
 		first = new node(second);
+		if (check) root = first;
 		first->left = left;
+		if (first->left != nullptr) {
+			first->left->parent = first;
+		}
 		first->right = right;
+		if (first->right != nullptr) {
+			first->right->parent = first;
+		}
 		first->parent = parent;
+		if (first->parent != nullptr) {
+			if (isright)
+				first->parent->right = first;
+			else
+				first->parent->left = first;
+		}
 		first->color = clr;
+		return first;
 	}
 
 	void delete_node(node* cur) noexcept {
@@ -306,12 +323,12 @@ protected:
 			
 			//black node deleting
 			if (cur->right != nullptr) {
-				move_node(cur, cur->right);
+				cur = move_node(cur, cur->right);
 				delete_node(cur->right);
 				return;
 			}
 			else {
-				move_node(cur, cur->left);
+				cur = move_node(cur, cur->left);
 
 				delete_node(cur->left);
 				return;
@@ -320,7 +337,7 @@ protected:
 
 		//2 children
 		node* nearest = nearest_key(cur);
-		move_node(cur, nearest);
+		cur = move_node(cur, nearest);
 		delete_node(nearest);
 		return;
 	}

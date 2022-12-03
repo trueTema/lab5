@@ -46,8 +46,9 @@ public:
 int main() {
 	setlocale(LC_ALL, "Russian");
 	srand(time(0));
-	Dictionary<int, int> d1;
-	Dictionary<int, int> d2 = d1;
-	cout << (d1 == d2);
+	sparse_matrix<int> mat = { {1,2,3},{1,2,3} };
+	mat.add_column({ 1,2 });
+	mat.remove_column(2);
+	cout << mat;
 	return 0;
 }
