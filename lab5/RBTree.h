@@ -367,6 +367,7 @@ protected:
 	}
 
 	void fix_traversal_order(node* cur) {
+		if (cur == nullptr) return;
 		if (cur->left == nullptr && cur->right == nullptr) {
 			traversal_order.Append(cur);
 			return;
@@ -542,7 +543,7 @@ public:
 			else {
 				_size--;
 
-				typename LinkedList<_Value>::iterator it = cur->data.second.find(val);
+				typename LinkedList<_Value>::iterator it = cur->data.second.find(cur->data.second.begin(), cur->data.second.end(), val);
 				if (it == cur->data.second.end()) throw SetException(NoSuchElement);
 				cur->data.second.del_item(it);
 				if (cur->data.second.GetLength() == 0) {

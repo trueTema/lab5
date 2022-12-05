@@ -19,7 +19,7 @@ private:
 public:
 	using iterator = typename RBTree<_Key, _Key, false, true, _cmp>::iterator;
 	MultiSet() : RBTree<_Key, _Key, false, true, _cmp>() { size_s = 0; }
-	MultiSet(const MultiSet<_Key, _cmp>& other) : RBTree<_Key, _Key, false, true, _cmp>(other) {
+	MultiSet(const MultiSet<_Key, _cmp>& other) {
 		size_s = other.size_s;
 	}
 	void insert(const _Key& key) {

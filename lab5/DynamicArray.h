@@ -261,7 +261,9 @@ void DynamicArray<T>::Rebuf(int NewSize) {
 	try {
 		T* items_cur = new T[NewSize];
 		size_t cpy_num = NewSize > size ? size : NewSize;
-		memcpy(items_cur, items, cpy_num * sizeof(T));
+		for (size_t i = 0; i < cpy_num; i++) {
+			items_cur[i] = items[i];
+		}
 		delete[] items;
 		items = items_cur;
 		size = NewSize;

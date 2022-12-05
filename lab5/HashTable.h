@@ -44,7 +44,7 @@ private:
 		for (typename LinkedList<Elem>::iterator it = HashList.begin(); it != HashList.end(); ) {
 			if ((HashVector[(*it).real_hash % hash_capacity] == HashList.end()) || (((*HashVector[(*it).real_hash % hash_capacity]).real_hash % hash_capacity) != ((*it).real_hash % hash_capacity))) {
 				(*it).tmp_hash = (*it).real_hash % hash_capacity;
-				HashList.push_tobegin(*it);
+				HashList.Prepend(*it);
 				HashVector[(*it).real_hash % hash_capacity] = HashList.begin();
 				if (it == HashVector[(*it).real_hash % prev_capacity]) {
 					HashVector[(*it).real_hash % prev_capacity] = HashList.end();
@@ -100,7 +100,7 @@ public:
 		size_t hash = hasher(key);
 		if (HashVector[hash % hash_capacity] == HashList.end())
 		{
-			HashList.push_back(Elem(key, value, hash, hash % hash_capacity));
+			HashList.Append(Elem(key, value, hash, hash % hash_capacity));
 			HashVector[hash % hash_capacity] = HashList.end() - 1;
 		}
 		else {

@@ -40,15 +40,20 @@ public:
 	}
 };
 
-
+struct _key {
+	int operator()(std::string x) const {
+		return x.size();
+	}
+};
 
 
 int main() {
 	setlocale(LC_ALL, "Russian");
 	srand(time(0));
-	sparse_matrix<int> mat = { {1,2,3},{1,2,3} };
-	mat.add_column({ 1,2 });
-	mat.remove_column(2);
-	cout << mat;
+	
+	sparse_vector<int> sv({ 1,2,3,4 });
+	sparse_vector<int> sv2 = sv;
+	sv2.append(5);
+	cout << (sv2.get(5));
 	return 0;
 }

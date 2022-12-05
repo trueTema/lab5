@@ -33,15 +33,15 @@ private:
 		Item* next = nullptr;
 		Item* prev = nullptr;
 		T data;
-		Item(const T& newdata) : data(newdata) {}
 		Item() = default;
+		Item(const T& newdata) : data(newdata) {}
 	};
 	struct List {
 		Item* head = nullptr;
 		Item* tail = nullptr;
 		List() {
 			this->head = nullptr;
-			this->tail = nullptr;
+			this->tail = new Item();
 		}
 		~List() {
 		}
@@ -127,7 +127,7 @@ private:
 		//	items->tail = cur->prev;
 		//	items->tail->next = nullptr;
 		//}
-		else if (item->prev == nullptr && item->next != items->tail) {
+		else if (item->prev == nullptr) {
 			items->head = item->next;
 			items->head->prev = nullptr;
 		}
@@ -283,6 +283,7 @@ public:
 				delete items;
 			size = 0;
 			items = CreateList();
+			if (other.GetLength() == 0) return *this;
 			for (Item* it = other.items->head; it != other.items->tail; it = it->next) {
 				this->push_back(it->data);
 			}
@@ -393,7 +394,7 @@ public:
 template<class T>
 LinkedList<T>::LinkedList() {
 	items = CreateList();
-	items->tail = new Item();
+	//items->tail = new Item();
 }
 
 template<class T>
@@ -426,7 +427,11 @@ LinkedList<T>::LinkedList(const LinkedList<T>& other) {
 template<class T>
 LinkedList<T>::LinkedList(LinkedList<T>&& other) : items(nullptr), size(0) {
 	items = other.items;
+	items->head = other.items->head;
+	items->tail = other.items->tail;
 	size = other.size;
+	other.items->head = nullptr;
+	other.items->tail = nullptr;
 	other.items = nullptr;
 	other.size = 0;
 }

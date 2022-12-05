@@ -47,7 +47,19 @@ public:
 		ms.remove(_key_getter(obj));
 	}
 	void calculate() {
-		update();
+		try {
+			update();
+		}
+		catch (SetException e) {
+			if (e.id != EmptySequence) {
+				throw e;
+			}
+			else {
+				max = _KeyType();
+				min = _KeyType();
+				median = _KeyType();
+			}
+		}
 	}
 	statistics(const LinkedList<_Obj>& list) {
 		for (typename LinkedList<_Obj>::const_iterator it = list.begin(); it != list.end(); it++) {
@@ -99,7 +111,20 @@ public:
 		count--;
 	}
 	void calculate() {
-		update();
+		try {
+			update();
+		}
+		catch (SetException e) {
+			if (e.id != EmptySequence) {
+				throw e;
+			}
+			else {
+				max = 0;
+				min = 0;
+				average = 0;
+				median = 0;
+			}
+		}
 	}
 	statistics(const LinkedList<_Obj>& list) {
 		for (typename LinkedList<_Obj>::const_iterator it = list.begin(); it != list.end(); it++) {
@@ -151,7 +176,20 @@ public:
 		count--;
 	}
 	void calculate() {
-		update();
+		try {
+			update();
+		}
+		catch (SetException e) {
+			if (e.id != EmptySequence) {
+				throw e;
+			}
+			else {
+				max = 0;
+				min = 0;
+				average = 0;
+				median = 0;
+			}
+		}
 	}
 	statistics(const LinkedList<_Obj>& list) {
 		for (typename LinkedList<_Obj>::const_iterator it = list.begin(); it != list.end(); it++) {
@@ -184,42 +222,23 @@ public:
 
 template<class _O, typename _K, class _Ky, class _C>
 std::ostream& operator <<(std::ostream& os, statistics<_O, _K, _Ky, _C>& st) {
-	try {
-		st.calculate();
-	}
-	catch (SetException e) {
-		if (e.id != EmptySequence) {
-			throw e;
-		}
-	}
+	st.calculate();
+
 	os << "Min: " << st.min << " Max: " << st.max << " Median: " << st.median << " Count: " << st.count << "\n";
 	return os;
 }
 
 template<class _O, class _Ky, class _C>
 std::ostream& operator <<(std::ostream& os, statistics<_O, int, _Ky, _C>& st) {
-	try {
-		st.calculate();
-	}
-	catch (SetException e) {
-		if (e.id != EmptySequence) {
-			throw e;
-		}
-	}
+	st.calculate();
 	os << "Min: " << st.min << " Max: " << st.max << " Median: " << st.median << " Count: " << st.count << " Average: " << st.average << "\n";
 	return os;
 }
 
 template<class _O, class _Ky, class _C>
 std::ostream& operator <<(std::ostream& os, statistics<_O, double, _Ky, _C>& st) {
-	try {
-		st.calculate();
-	}
-	catch (SetException e) {
-		if (e.id != EmptySequence) {
-			throw e;
-		}
-	}
+	st.calculate();
+
 	os << "Min: " << st.min << " Max: " << st.max << " Median: " << st.median << " Count: " << st.count << " Average: " << st.average << "\n";
 	return os;
 }
@@ -283,19 +302,6 @@ public:
 	}
 	~Histogram() = default;
 
-	void print() {
-		std::cout << "\tRange\tObjects\n\n\n";
-		for (typename DynamicArray<_KeyType>::const_iterator it = bins.cbegin(); it != (bins.cend() - 1); it++) {
-			std::cout << "\t" << *it << " - " << *(it + 1) << "\t";
-			for (typename LinkedList<_Obj>::const_iterator it_l = hd[*it].cbegin(); it_l != hd[*it].cend(); it_l++) {
-				std::cout << *it_l;
-				if (it_l != (hd[*it].cend() - 1)) std::cout << ",";
-				std::cout << " ";
-			}
-			std::cout << "\n\n";
-		}
-	}
-
 
 	template<class _O, typename _K, class _Ky, class _C>
 	friend std::ostream& operator<<(std::ostream&, Histogram<_O, _K, _Ky, _C>&);
@@ -322,7 +328,8 @@ public:
 	void remove(const _Obj& object) {
 		int pos = find_place(object);
 		if (pos == -1) return;
-		hd[bins[pos]].del_item(object);
+		typename LinkedList<_Obj>::iterator it = hd[bins[pos]].find(hd[bins[pos]].begin(), hd[bins[pos]].end(), object);
+		hd[bins[pos]].del_item(it);
 		stats[pos].remove(object);
 	}
 };

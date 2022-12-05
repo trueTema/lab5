@@ -54,128 +54,7 @@ public:
 	}
 	~sparse_matrix() = default;
 
-	sparse_matrix<T>& operator*=(sparse_matrix<T>& other) {
-		if (other.ver != hor || other.hor != ver) throw SetException(IncorrectArraySize);
-		sparse_matrix<T> cur = *this;
-		this->ver = other.ver;
-		for (size_t i = 0; i < cur.hor; i++) {
-			for (size_t j = 0; j < other.ver; j++) {
-				T value = T();
-				for (size_t k = 0; k < cur.ver; k++) {
-					value += cur.get(i + 1, k + 1) * other.get(k + 1, j + 1);
-				}
-				set(i + 1, j + 1, value);
-			}
-		}
-		return *this;
-	}
-	sparse_matrix<T> operator*(sparse_matrix<T>& other) {
-		if (other.ver != hor || other.hor != ver) throw SetException(IncorrectArraySize);
-		sparse_matrix<T> res = sparse_matrix<T>(this->hor, other.ver);
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < other.ver; j++) {
-				T value = T();
-				for (size_t k = 0; k < ver; k++) {
-					value += get(i + 1, k + 1) * other.get(k + 1, j + 1);
-				}
-				res.set(i + 1, j + 1, value);
-			}
-		}
-		return res;
-	}
-	sparse_matrix<T> operator*(const T& other) {
-		sparse_matrix<T> res(this->hor, this->ver);
-		for (typename Dictionary<std::pair<size_t, size_t>, T>::iterator it = matrix.begin(); it != matrix.end(); it++) {
-			res.matrix[(*it).first] = (*it).second[0] * other;
-		}
-		return res;
-	}
-	sparse_matrix<T>& operator*=(const T& other) {
-		for (typename Dictionary<std::pair<size_t, size_t>, T>::iterator it = matrix.begin(); it != matrix.end(); it++) {
-			(*it).second[0] *= other;
-		}
-		return *this;
-	}
-	sparse_matrix<T>& operator+=(sparse_matrix<T>& other) {
-		if (other.hor != hor || other.ver != ver) throw SetException(IncorrectArraySize);
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < ver; j++) {
-				T value = this->get(i + 1, j + 1) + other.get(i + 1, j + 1);
-				set(i + 1, j + 1, value);
-			}
-		}
-		return *this;
-	}
-	sparse_matrix<T> operator+(sparse_matrix<T>& other) {
-		if (other.hor != hor || other.ver != ver) throw SetException(IncorrectArraySize);
-		sparse_matrix<T> res = sparse_matrix<T>(this->hor, ver);
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < ver; j++) {
-				T value = this->get(i + 1, j + 1) + other.get(i + 1, j + 1);
-				res.set(i + 1, j + 1, value);
-			}
-		}
-		return res;
-	}
-	sparse_matrix<T> operator+(const T& other) {
-		sparse_matrix<T> res(this->hor, this->ver);
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < ver; j++) {
-				T value = this->get(i + 1, j + 1) + other;
-				res.set(i + 1, j + 1, value);
-			}
-		}
-		return res;
-	}
-	sparse_matrix<T>& operator+=(const T& other) {
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < ver; j++) {
-				T value = this->get(i + 1, j + 1) + other;
-				set(i + 1, j + 1, value);
-			}
-		}
-		return *this;
-	}
-	sparse_matrix<T>& operator-=(sparse_matrix<T>& other) {
-		if (other.hor != hor || other.ver != ver) throw SetException(IncorrectArraySize);
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < ver; j++) {
-				T value = this->get(i + 1, j + 1) - other.get(i + 1, j + 1);
-				set(i + 1, j + 1, value);
-			}
-		}
-		return *this;
-	}
-	sparse_matrix<T> operator-(sparse_matrix<T>& other) {
-		if (other.hor != hor || other.ver != ver) throw SetException(IncorrectArraySize);
-		sparse_matrix<T> res = sparse_matrix<T>(this->hor, ver);
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < ver; j++) {
-				T value = this->get(i + 1, j + 1) - other.get(i + 1, j + 1);
-				res.set(i + 1, j + 1, value);
-			}
-		}
-		return res;
-	}
-	sparse_matrix<T> operator-(const T& other) {
-		sparse_matrix<T> res(this->hor, this->ver);
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < ver; j++) {
-				T value = this->get(i + 1, j + 1) - other;
-				res.set(i + 1, j + 1, value);
-			}
-		}
-		return res;
-	}
-	sparse_matrix<T>& operator-=(const T& other) {
-		for (size_t i = 0; i < hor; i++) {
-			for (size_t j = 0; j < ver; j++) {
-				T value = this->get(i + 1, j + 1) - other;
-				set(i + 1, j + 1, value);
-			}
-		}
-		return *this;
-	}
+	
 
 	void set(size_t row, size_t column, const T& value) {
 		if (row > hor || column > ver) throw SetException(IncorrectRange);
@@ -294,5 +173,204 @@ std::ostream& operator<<(std::ostream& os, sparse_matrix<T>& matrix) {
 		os << "\n";
 	}
 	os << "\n";
+	return os;
+}
+
+template<typename T>
+class sparse_mmatrix : public sparse_matrix<T> {
+private:
+	using base = sparse_matrix<T>;
+public:
+	sparse_mmatrix() = default;
+	sparse_mmatrix(size_t hor, size_t ver) : base(hor, ver) {}
+	sparse_mmatrix(const std::initializer_list<std::initializer_list<T>>&list) : base(list) {}
+	sparse_mmatrix(DynamicArray<DynamicArray<T>>& matrix) : base(matrix) {}
+	sparse_mmatrix(const sparse_mmatrix<T>& other) : base(other) {}
+	sparse_mmatrix(sparse_mmatrix<T>&& other) {}
+	~sparse_mmatrix() = default;
+
+	sparse_mmatrix<T>& operator*=(sparse_mmatrix<T>& other) {
+		if (other.ver != base::hor || other.hor != base::ver) throw SetException(IncorrectArraySize);
+		sparse_mmatrix<T> cur = *this;
+		this->ver = other.ver;
+		for (size_t i = 0; i < cur.hor; i++) {
+			for (size_t j = 0; j < other.ver; j++) {
+				T value = T();
+				for (size_t k = 0; k < cur.ver; k++) {
+					value += cur.get(i + 1, k + 1) * other.get(k + 1, j + 1);
+				}
+				set(i + 1, j + 1, value);
+			}
+		}
+		return *this;
+	}
+	sparse_mmatrix<T> operator*(sparse_mmatrix<T>& other) {
+		if (other.ver != base::hor || other.hor != base::ver) throw SetException(IncorrectArraySize);
+		sparse_mmatrix<T> res = sparse_mmatrix<T>(base::hor, other.ver);
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < other.ver; j++) {
+				T value = T();
+				for (size_t k = 0; k < base::ver; k++) {
+					value += base::get(i + 1, k + 1) * other.get(k + 1, j + 1);
+				}
+				res.set(i + 1, j + 1, value);
+			}
+		}
+		return res;
+	}
+	sparse_mmatrix<T> operator*(const T& other) {
+		sparse_mmatrix<T> res(base::hor, base::ver);
+		for (typename Dictionary<std::pair<size_t, size_t>, T>::iterator it = base::matrix.begin(); it != base::matrix.end(); it++) {
+			res.matrix[(*it).first] = (*it).second[0] * other;
+		}
+		return res;
+	}
+	sparse_mmatrix<T>& operator*=(const T& other) {
+		for (typename Dictionary<std::pair<size_t, size_t>, T>::iterator it = base::matrix.begin(); it != base::matrix.end(); it++) {
+			(*it).second[0] *= other;
+		}
+		return *this;
+	}
+	sparse_mmatrix<T>& operator+=(sparse_mmatrix<T>& other) {
+		if (other.hor != base::hor || other.ver != base::ver) throw SetException(IncorrectArraySize);
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < base::ver; j++) {
+				T value = this->get(i + 1, j + 1) + other.get(i + 1, j + 1);
+				set(i + 1, j + 1, value);
+			}
+		}
+		return *this;
+	}
+	sparse_mmatrix<T> operator+(sparse_mmatrix<T>& other) {
+		if (other.hor != base::hor || other.ver != base::ver) throw SetException(IncorrectArraySize);
+		sparse_mmatrix<T> res = sparse_mmatrix<T>(base::hor, base::ver);
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < base::ver; j++) {
+				T value = this->get(i + 1, j + 1) + other.get(i + 1, j + 1);
+				res.set(i + 1, j + 1, value);
+			}
+		}
+		return res;
+	}
+	sparse_mmatrix<T> operator+(const T& other) {
+		sparse_mmatrix<T> res(base::hor, base::ver);
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < base::ver; j++) {
+				T value = this->get(i + 1, j + 1) + other;
+				res.set(i + 1, j + 1, value);
+			}
+		}
+		return res;
+	}
+	sparse_mmatrix<T>& operator+=(const T& other) {
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < base::ver; j++) {
+				T value = this->get(i + 1, j + 1) + other;
+				set(i + 1, j + 1, value);
+			}
+		}
+		return *this;
+	}
+	sparse_mmatrix<T>& operator-=(sparse_mmatrix<T>& other) {
+		if (other.hor != base::hor || other.ver != base::ver) throw SetException(IncorrectArraySize);
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < base::ver; j++) {
+				T value = this->get(i + 1, j + 1) - other.get(i + 1, j + 1);
+				set(i + 1, j + 1, value);
+			}
+		}
+		return *this;
+	}
+	sparse_mmatrix<T> operator-(sparse_mmatrix<T>& other) {
+		if (other.hor != base::hor || other.ver != base::ver) throw SetException(IncorrectArraySize);
+		sparse_mmatrix<T> res = sparse_mmatrix<T>(base::hor, base::ver);
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < base::ver; j++) {
+				T value = this->get(i + 1, j + 1) - other.get(i + 1, j + 1);
+				res.set(i + 1, j + 1, value);
+			}
+		}
+		return res;
+	}
+	sparse_mmatrix<T> operator-(const T& other) {
+		sparse_mmatrix<T> res(base::hor, base::ver);
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < base::ver; j++) {
+				T value = this->get(i + 1, j + 1) - other;
+				res.set(i + 1, j + 1, value);
+			}
+		}
+		return res;
+	}
+	sparse_mmatrix<T>& operator-=(const T& other) {
+		for (size_t i = 0; i < base::hor; i++) {
+			for (size_t j = 0; j < base::ver; j++) {
+				T value = this->get(i + 1, j + 1) - other;
+				set(i + 1, j + 1, value);
+			}
+		}
+		return *this;
+	}
+	sparse_mmatrix<T>& operator=(const sparse_mmatrix<T>& other) {
+		base::operator=(other);
+		return *this;
+	}
+	sparse_mmatrix<T>& operator=(sparse_mmatrix<T>&& other) {
+		base::operator=(other);
+		return *this;
+	}
+};
+
+template<typename T>
+class sparse_vector : private sparse_matrix<T> {
+private:
+	using base = sparse_matrix<T>;
+	size_t _size;
+public:
+	sparse_vector() = default;
+	sparse_vector(size_t sz) : base(1, sz) {
+		_size = 0;
+	}
+	sparse_vector(const std::initializer_list<T>& list) : base({ list }) {
+		_size = list.size();
+	}
+	sparse_vector(const sparse_vector<T>& other) : base(other) {
+		_size = other._size;
+	}
+	sparse_vector(sparse_vector<T>&& other) : base(other) {
+		_size = other._size;
+		other._size = 0;
+	}
+	~sparse_vector() = default;
+	size_t size() const noexcept {
+		return _size;
+	}
+	void append(const T& item) {
+		base::add_column({ item });
+	}
+	void erase(size_t pos) {
+		base::remove_column(pos);
+	}
+
+	const T& get(size_t pos) {
+		return base::get(1, pos);
+	}
+
+	template<typename U>
+	friend std::ostream& operator<<(std::ostream&, sparse_vector<U>&);
+};
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, sparse_vector<T>& matrix) {
+	os << "{ ";
+		for (size_t j = 0; j < matrix.ver; j++) {
+			if (matrix.matrix.find(std::make_pair(0, j))) {
+				os << matrix.matrix[std::make_pair(0, j)];
+			}
+			else os << T();
+			if (j != matrix.ver - 1) os << ',';
+			os << " ";
+		}
+	os << "}";
 	return os;
 }
