@@ -148,6 +148,7 @@ public:
 
 	//операторы
 	T& operator[] (int index);
+	const T& operator[] (int index) const;
 	bool operator==(DynamicArray<T>& seq);
 	bool operator!=(DynamicArray<T>& seq);
 
@@ -405,6 +406,11 @@ bool DynamicArray<T>::IsSubArr(DynamicArray<T>* seq) {
 //операторы
 template <class T>
 T& DynamicArray<T>:: operator[] (int index) {
+	return this->Get(index);
+}
+
+template <class T>
+const T& DynamicArray<T>:: operator[] (int index) const {
 	return this->Get(index);
 }
 

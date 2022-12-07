@@ -33,7 +33,10 @@ private:
 		Item* next = nullptr;
 		Item* prev = nullptr;
 		T data;
-		Item() = default;
+		Item() : data() {
+			next = nullptr;
+			prev = nullptr;
+		}
 		Item(const T& newdata) : data(newdata) {}
 	};
 	struct List {
@@ -427,11 +430,7 @@ LinkedList<T>::LinkedList(const LinkedList<T>& other) {
 template<class T>
 LinkedList<T>::LinkedList(LinkedList<T>&& other) : items(nullptr), size(0) {
 	items = other.items;
-	items->head = other.items->head;
-	items->tail = other.items->tail;
 	size = other.size;
-	other.items->head = nullptr;
-	other.items->tail = nullptr;
 	other.items = nullptr;
 	other.size = 0;
 }

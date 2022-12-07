@@ -86,6 +86,26 @@ public:
 			pos++;
 		}
 	}
+	void add_row(DynamicArray<T>& list) {
+		if (list.GetSize() != ver && ver != 0) throw SetException(IncorrectArraySize);
+		hor++;
+		if (ver == 0) ver = list.GetSize();
+		size_t pos = 0;
+		for (auto i : list) {
+			if (i != T()) matrix[std::make_pair(hor - 1, pos)] = i;
+			pos++;
+		}
+	}
+	void add_column(DynamicArray<T>& list) {
+		if (list.GetSize() != hor && hor != 0) throw SetException(IncorrectArraySize);
+		ver++;
+		if (hor == 0) hor = list.GetSize();
+		size_t pos = 0;
+		for (auto i : list) {
+			if (i != T()) matrix[std::make_pair(pos, ver - 1)] = i;
+			pos++;
+		}
+	}
 	void remove_row(size_t number) {
 		if (number < 1 || number > hor) throw SetException(IncorrectRange);
 		for (size_t i = 0; i < ver; i++) {
@@ -118,7 +138,7 @@ public:
 		}
 		ver--;
 	}
-	const T& get(size_t row, size_t column) {
+	T get(size_t row, size_t column) {
 		row--;
 		column--;
 		if (row >= hor) throw SetException(IncorrectRange);
@@ -152,10 +172,28 @@ public:
 		return T();
 	}
 	bool operator==(sparse_matrix<T>& other) {
-		return hor == other.hor && ver == other.ver && matrix == other.matrix;
+		if (!(hor == other.hor && ver == other.ver)) {
+			return false;
+		}
+		for (size_t i = 1; i <= hor; i++) {
+			for (size_t j = 1; j <= ver; j++) {
+				if (get(i, j) != other.get(i, j))
+					return false;
+			}
+		}
+		return true;
 	}
 	bool operator!=(sparse_matrix<T>& other) {
-		return !(hor == other.hor && ver == other.ver && matrix == other.matrix);
+		if (!(hor == other.hor && ver == other.ver)) {
+			return true;
+		}
+		for (size_t i = 0; i < hor; i++) {
+			for (size_t j = 0; j < ver; j++) {
+				if (get(i, j) != other.get(i, j))
+					return true;
+			}
+		}
+		return false;
 	}
 	template<typename U>
 	friend std::ostream& operator<<(std::ostream&, sparse_matrix<U>&);
@@ -199,7 +237,7 @@ public:
 				for (size_t k = 0; k < cur.ver; k++) {
 					value += cur.get(i + 1, k + 1) * other.get(k + 1, j + 1);
 				}
-				set(i + 1, j + 1, value);
+				base::set(i + 1, j + 1, value);
 			}
 		}
 		return *this;
@@ -235,8 +273,8 @@ public:
 		if (other.hor != base::hor || other.ver != base::ver) throw SetException(IncorrectArraySize);
 		for (size_t i = 0; i < base::hor; i++) {
 			for (size_t j = 0; j < base::ver; j++) {
-				T value = this->get(i + 1, j + 1) + other.get(i + 1, j + 1);
-				set(i + 1, j + 1, value);
+				T value = base::get(i + 1, j + 1) + other.get(i + 1, j + 1);
+				base::set(i + 1, j + 1, value);
 			}
 		}
 		return *this;
@@ -246,7 +284,7 @@ public:
 		sparse_mmatrix<T> res = sparse_mmatrix<T>(base::hor, base::ver);
 		for (size_t i = 0; i < base::hor; i++) {
 			for (size_t j = 0; j < base::ver; j++) {
-				T value = this->get(i + 1, j + 1) + other.get(i + 1, j + 1);
+				T value = base::get(i + 1, j + 1) + other.get(i + 1, j + 1);
 				res.set(i + 1, j + 1, value);
 			}
 		}
@@ -256,7 +294,7 @@ public:
 		sparse_mmatrix<T> res(base::hor, base::ver);
 		for (size_t i = 0; i < base::hor; i++) {
 			for (size_t j = 0; j < base::ver; j++) {
-				T value = this->get(i + 1, j + 1) + other;
+				T value = base::get(i + 1, j + 1) + other;
 				res.set(i + 1, j + 1, value);
 			}
 		}
@@ -265,8 +303,8 @@ public:
 	sparse_mmatrix<T>& operator+=(const T& other) {
 		for (size_t i = 0; i < base::hor; i++) {
 			for (size_t j = 0; j < base::ver; j++) {
-				T value = this->get(i + 1, j + 1) + other;
-				set(i + 1, j + 1, value);
+				T value = base::get(i + 1, j + 1) + other;
+				base::set(i + 1, j + 1, value);
 			}
 		}
 		return *this;
@@ -275,8 +313,8 @@ public:
 		if (other.hor != base::hor || other.ver != base::ver) throw SetException(IncorrectArraySize);
 		for (size_t i = 0; i < base::hor; i++) {
 			for (size_t j = 0; j < base::ver; j++) {
-				T value = this->get(i + 1, j + 1) - other.get(i + 1, j + 1);
-				set(i + 1, j + 1, value);
+				T value = base::get(i + 1, j + 1) - other.get(i + 1, j + 1);
+				base::set(i + 1, j + 1, value);
 			}
 		}
 		return *this;
@@ -286,7 +324,7 @@ public:
 		sparse_mmatrix<T> res = sparse_mmatrix<T>(base::hor, base::ver);
 		for (size_t i = 0; i < base::hor; i++) {
 			for (size_t j = 0; j < base::ver; j++) {
-				T value = this->get(i + 1, j + 1) - other.get(i + 1, j + 1);
+				T value = base::get(i + 1, j + 1) - other.get(i + 1, j + 1);
 				res.set(i + 1, j + 1, value);
 			}
 		}
@@ -296,7 +334,7 @@ public:
 		sparse_mmatrix<T> res(base::hor, base::ver);
 		for (size_t i = 0; i < base::hor; i++) {
 			for (size_t j = 0; j < base::ver; j++) {
-				T value = this->get(i + 1, j + 1) - other;
+				T value = base::get(i + 1, j + 1) - other;
 				res.set(i + 1, j + 1, value);
 			}
 		}
@@ -305,8 +343,8 @@ public:
 	sparse_mmatrix<T>& operator-=(const T& other) {
 		for (size_t i = 0; i < base::hor; i++) {
 			for (size_t j = 0; j < base::ver; j++) {
-				T value = this->get(i + 1, j + 1) - other;
-				set(i + 1, j + 1, value);
+				T value = base::get(i + 1, j + 1) - other;
+				base::set(i + 1, j + 1, value);
 			}
 		}
 		return *this;

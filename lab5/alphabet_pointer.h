@@ -11,6 +11,7 @@ private:
 	const std::string restricted = "!\"#$%&’()*+,-./:;<=>?@[]^_`{|}~.";
 	const size_t page_size;
 	size_t page_num = 1;
+	size_t cur_size = 0;
 	LinkedList<std::string>* split(const std::string::const_iterator& begin, const std::string::const_iterator& end) const noexcept {
 		LinkedList<std::string>* list = new LinkedList<std::string>();
 		for (std::string::const_iterator it = begin; it != end; it++) {
@@ -28,17 +29,18 @@ private:
 	}
 
 	void delete_restricted(std::string& str) {
-		for (std::string::iterator it = str.begin(); it != str.end(); it++) {
+		for (std::string::iterator it = str.begin(); it != str.end();) {
 			if (restricted.find(*it) != std::string::npos) {
-				it--;
-				str.erase(it + 1);
+				str.erase(it);
 			}
+			else it++;
 		}
 	}
 
 	void place_to_dict(LinkedList<std::string>* w_list) {
-		size_t cur_size = 0;
 		for (LinkedList<std::string>::iterator it = w_list->begin(); it != w_list->end(); it++) {
+			delete_restricted(*it);
+			if ((*it).size() == 0) continue;
 			if (!IsWords) {
 				if ((*it).size() > (page_num == 1 ? page_size / 2 : page_num % 10 == 0 ? page_size*3/4:page_size) && cur_size == 0) page_num--;
 				cur_size += (*it).size();
@@ -55,13 +57,14 @@ private:
 					cur_size = 1;
 				}
 			}
-			delete_restricted(*it);
 			dict[*it].Append(page_num);
 		}
 	}
 public:
 	APointer() = delete;
+	APointer(size_t page_size) :page_size(page_size) {}
 	APointer(const std::string& str, size_t page_size) : page_size(page_size) {
+		if (str.size() == 0) return;
 		text = str;
 		if (page_size < 1) throw SetException(IncorrectValue);
 		place_to_dict(split(str.cbegin(), str.cend()));
@@ -82,7 +85,8 @@ public:
 		}
 	}
 	void add(const std::string& text) {
-		this->text += text;
+		if (text.size() == 0) return;
+		this->text += " " + text;
 		place_to_dict(split(text.cbegin(), text.cend()));
 	}
 	void remove(const std::string& text) {
@@ -93,6 +97,7 @@ public:
 		}
 		dict.clear();
 		page_num = 1;
+		cur_size = 0;
 		place_to_dict(split(this->text.cbegin(), this->text.cend()));
 	}
 };

@@ -61,15 +61,16 @@ public:
 			}
 		}
 	}
-	statistics(const LinkedList<_Obj>& list) {
-		for (typename LinkedList<_Obj>::const_iterator it = list.begin(); it != list.end(); it++) {
-			ms.insert(_key_getter(*it));
+	statistics(const LinkedList<_Obj>& list) : statistics<_Obj, _KeyType, _Key, _cmp>() {
+		for (typename LinkedList<_Obj>::iterator it = list.begin(); it != list.end(); it++) {
+			add(*it);
 		}
-		update();
+		calculate();
 	}
-	statistics<_Obj, double, _Key, _cmp>& operator=(const statistics<_Obj, _KeyType, _Key, _cmp>& other) {
+	statistics<_Obj, _KeyType, _Key, _cmp>& operator=(const statistics<_Obj, _KeyType, _Key, _cmp>& other) {
 		this->max = other.max;
 		this->min = other.min;
+		this->count = other.count;
 		this->ms = other.ms;
 		this->median = other.median;
 		return *this;
@@ -126,18 +127,17 @@ public:
 			}
 		}
 	}
-	statistics(const LinkedList<_Obj>& list) {
-		for (typename LinkedList<_Obj>::const_iterator it = list.begin(); it != list.end(); it++) {
-			ms.insert(_key_getter(*it));
-			average += _key_getter(*it);
+	statistics(LinkedList<_Obj>& list) : statistics<_Obj, int, _Key, _cmp>() {
+		for (typename LinkedList<_Obj>::iterator it = list.begin(); it != list.end(); it++) {
+			add(*it);
 		}
-		average /= list.GetLength();
-		update();
+		calculate();
 	}
 	statistics<_Obj, int, _Key, _cmp>& operator=(const statistics<_Obj, int, _Key, _cmp>& other) {
 		this->max = other.max;
 		this->min = other.min;
 		this->ms = other.ms;
+		this->count = other.count;
 		this->average = other.average;
 		this->median = other.median;
 		return *this;
@@ -158,9 +158,7 @@ private:
 public:
 	double max;
 	double min;
-	//double up_quantile;
 	double median;
-	//double down_quantile;
 	int count;
 	double average;
 	statistics() = default;
@@ -191,32 +189,20 @@ public:
 			}
 		}
 	}
-	statistics(const LinkedList<_Obj>& list) {
-		for (typename LinkedList<_Obj>::const_iterator it = list.begin(); it != list.end(); it++) {
-			ms.insert(_key_getter(*it));
-			average += _key_getter(*it);
+	statistics(const LinkedList<_Obj>& list) : statistics<_Obj, double, _Key, _cmp>() {
+		for (typename LinkedList<_Obj>::iterator it = list.begin(); it != list.end(); it++) {
+			add(*it);
 		}
-		average /= list.GetLength();
-		update();
+		calculate();
 	}
 	statistics<_Obj, double, _Key, _cmp>& operator=(const statistics<_Obj, double, _Key, _cmp>& other) {
 		this->max = other.max;
 		this->min = other.min;
 		this->average = other.average;
+		this->count = other.count;
 		this->ms = other.ms;
 		this->median = other.median;
 		return *this;
-	}
-	void print() {
-		try {
-			calculate();
-		}
-		catch (SetException e) {
-			if (e.id != EmptySequence) {
-				throw e;
-			}
-		}
-		std::cout << "Min: " << min << " Max: " << max << " Median: " << median << " Count: " << count << " Average: " << average << "\n";
 	}
 };
 
@@ -277,27 +263,40 @@ private:
 	}
 public:
 	Histogram() = delete;
-	Histogram(const std::initializer_list<_KeyType>& bins) {
+	Histogram(DynamicArray<_KeyType>& bins) {
+		if (bins.GetSize() < 2) throw SetException(IncorrectRange);
+		hd.reserve(bins.GetSize());
+		this->bins = bins;
+		stats.resize(bins.GetSize() - 1);
+		for (auto i : bins) {
+			hd[i] = LinkedList<_Obj>();
+		}
+	}
+	Histogram(DynamicArray<_Obj>& vector, DynamicArray<_KeyType>& bins) {
+		if (bins.GetSize() < 2) throw SetException(IncorrectRange);
+		hd.reserve(bins.GetSize() - 1);
+		for (auto i : bins) {
+			hd[i] = LinkedList<_Obj>();
+		}
+		this->bins = bins;
+		stats.resize(bins.GetSize() - 1);
+		for (auto it : vector) {
+			int pos = find_place(it);
+			if (pos == -1) continue;
+			hd[this->bins[pos]].Append(it);
+		}
+		for (int i = 0; i < bins.GetSize() - 1; i++) {
+			stats[i] = hd[this->bins[i]];
+		}
+	}
+	Histogram(const std::initializer_list<_KeyType>& bins) 
+	{
 		if (bins.size() < 2) throw SetException(IncorrectRange);
 		hd.reserve(bins.size());
 		this->bins = bins;
 		stats.resize(bins.size() - 1);
 		for (auto i : bins) {
 			hd[i] = LinkedList<_Obj>();
-		}
-	}
-	Histogram(const DynamicArray<_Obj>& vector, const DynamicArray<_KeyType>& bins) {
-		if (bins.size() < 2) throw SetException(IncorrectRange);
-		hd.reserve(bins.size());
-		this->bins = bins;
-		stats.resize(bins.size() - 1);
-		for (typename DynamicArray<_Obj>::const_iterator it = vector.cbegin(); it != vector.cend(); it++) {
-			int pos = find_place(*it);
-			if (pos == -1) continue;
-			hd[bins[pos]].Append(*it);
-		}
-		for (int i = 0; i < bins.GetSize(); i++) {
-			stats[i] = hd[bins[i]];
 		}
 	}
 	~Histogram() = default;
