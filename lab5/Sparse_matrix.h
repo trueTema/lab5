@@ -96,6 +96,13 @@ public:
 			pos++;
 		}
 	}
+	size_t get_hor() const {
+		return hor;
+	}
+
+	size_t get_ver() const {
+		return ver;
+	}
 	void add_column(DynamicArray<T>& list) {
 		if (list.GetSize() != hor && hor != 0) throw SetException(IncorrectArraySize);
 		ver++;
@@ -201,7 +208,7 @@ public:
 
 template<typename T>
 std::ostream& operator<<(std::ostream& os, sparse_matrix<T>& matrix) {
-	os << "\n\n";
+	os << "\n";
 	for (size_t i = 0; i < matrix.hor; i++) {
 		for (size_t j = 0; j < matrix.ver; j++) {
 			if (matrix.matrix.find(std::make_pair(i, j))) {
@@ -224,7 +231,7 @@ public:
 	sparse_mmatrix(const std::initializer_list<std::initializer_list<T>>&list) : base(list) {}
 	sparse_mmatrix(DynamicArray<DynamicArray<T>>& matrix) : base(matrix) {}
 	sparse_mmatrix(const sparse_mmatrix<T>& other) : base(other) {}
-	sparse_mmatrix(sparse_mmatrix<T>&& other) {}
+	sparse_mmatrix(sparse_mmatrix<T>&& other) : base(other) {}
 	~sparse_mmatrix() = default;
 
 	sparse_mmatrix<T>& operator*=(sparse_mmatrix<T>& other) {

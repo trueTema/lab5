@@ -2,6 +2,7 @@
 #include "HashDictionary.h"
 //#define DynamicArray<statistics<_Obj, _KeyType, _Key, _cmp>> std::vector<statistics<_Obj, _KeyType, _Key, _cmp>>
 #include "Set.h"
+#include "Auxillary.h"
 
 //template<typename T>
 //struct MyComparator {
@@ -18,6 +19,10 @@ struct MyKeyGetter {
 		return elem;
 	}
 };
+
+
+
+
 
 template<class _Obj, typename _KeyType, class _Key, class _cmp>
 struct statistics {
@@ -61,8 +66,8 @@ public:
 			}
 		}
 	}
-	statistics(const LinkedList<_Obj>& list) : statistics<_Obj, _KeyType, _Key, _cmp>() {
-		for (typename LinkedList<_Obj>::iterator it = list.begin(); it != list.end(); it++) {
+	statistics(LinkedList<_Obj>& list) : statistics<_Obj, _KeyType, _Key, _cmp>() {
+		for (typename LinkedList<_Obj>::const_iterator it = list.cbegin(); it != list.cend(); it++) {
 			add(*it);
 		}
 		calculate();
@@ -76,7 +81,7 @@ public:
 		return *this;
 	}
 	template<class _O, typename _K, class _Ky, class _C>
-	friend std::ostream& operator <<(std::ostream& os, const statistics<_O, _K, _Ky, _C>);
+	friend std::ostream& operator <<(std::ostream& os, statistics<_O, _K, _Ky, _C>&);
 };
 template<class _Obj, class _Key, class _cmp>
 struct statistics<_Obj, int, _Key, _cmp> {
@@ -189,7 +194,7 @@ public:
 			}
 		}
 	}
-	statistics(const LinkedList<_Obj>& list) : statistics<_Obj, double, _Key, _cmp>() {
+	statistics(LinkedList<_Obj>& list) : statistics<_Obj, double, _Key, _cmp>() {
 		for (typename LinkedList<_Obj>::iterator it = list.begin(); it != list.end(); it++) {
 			add(*it);
 		}
@@ -224,7 +229,6 @@ std::ostream& operator <<(std::ostream& os, statistics<_O, int, _Ky, _C>& st) {
 template<class _O, class _Ky, class _C>
 std::ostream& operator <<(std::ostream& os, statistics<_O, double, _Ky, _C>& st) {
 	st.calculate();
-
 	os << "Min: " << st.min << " Max: " << st.max << " Median: " << st.median << " Count: " << st.count << " Average: " << st.average << "\n";
 	return os;
 }
@@ -306,10 +310,11 @@ public:
 	friend std::ostream& operator<<(std::ostream&, Histogram<_O, _K, _Ky, _C>&);
 
 	void describe() {
-		std::cout << "\tRange\tStatistics\n\n\n";
+		std::cout << "\tRange\t\tStatistics\n\n\n";
 		for (int it = 0; it < (bins).GetSize() - 1; it++) {
-			std::cout << "\t" << (bins)[it] << " - " << (bins)[it + 1] << "\t";
-			std::cout << (stats)[it];
+			std::cout << "\t" << (bins)[it] << " - " << (bins)[it + 1];
+			std::cout << Traits::remake_string("", 15 - Traits::_Length<_KeyType>::cast(bins[it]) - Traits::_Length<_KeyType>::cast(bins[it + 1]) - 3);
+			std::cout << "\t" << (stats)[it];
 			std::cout << "\n\n";
 		}
 	}
@@ -335,9 +340,11 @@ public:
 
 template<class _O, typename _K, class _Ky, class _C>
 std::ostream& operator<<(std::ostream& os, Histogram<_O, _K, _Ky, _C>& hist) {
-	os << "\tRange\tObjects\n\n\n";
+	os << "\tRange\t\tObjects\n\n\n";
 	for (typename DynamicArray<_K>::const_iterator it = hist.bins.cbegin(); it != (hist.bins.cend() - 1); it++) {
-		os << "\t" << *it << " - " << *(it + 1) << "\t";
+		os << "\t" << *it << " - " << *(it + 1);
+		std::cout << Traits::remake_string("", 15 - Traits::_Length<_K>::cast(*it) - _Length<_K>::cast(*(it + 1)) - 3);
+		std::cout << "\t";
 		for (typename LinkedList<_O>::const_iterator it_l = hist.hd[*it].cbegin(); it_l != hist.hd[*it].cend(); it_l++) {
 			os << *it_l;
 			if (it_l != (hist.hd[*it].cend() - 1)) os << ",";

@@ -70,8 +70,10 @@ public:
 		place_to_dict(split(str.cbegin(), str.cend()));
 	}
 	LinkedList<size_t> get_pages(const std::string& word) noexcept {
-		LinkedList<size_t> res(dict[word]);
-		return res;
+		LinkedList<size_t> ans;
+		if (dict.find(word))
+			ans = dict[word];
+		return ans;
 	}
 	void print() noexcept {
 		for (Dictionary<std::string, LinkedList<size_t>>::iterator it = dict.begin(); it != dict.end(); it++) {

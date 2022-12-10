@@ -10,54 +10,57 @@
 #include "Histogram.h"
 #include "Set.h"
 #include "alphabet_pointer.h"
+#include <Windows.h>
 #include "Sparse_matrix.h"
 #include "menu.h"
 
 using namespace std;
 
-struct x {
-	string name;
-	int age;
-	int salary;
-	x() = default;
-	x(string n, int a, int s) {
-		name = n;
-		age = a;
-		salary = s;
+void print(const LinkedList<int>& list) {
+	for (LinkedList<int>::const_iterator it = list.cbegin(); it != list.cend(); it++) {
+		cout << *it << " ";
 	}
-	int& operator[](int a) {
-		return age;
-	}
-	const int& operator[](int a) const {
-		return age;
-	}
-	friend std::ostream& operator<<(std::ostream&, const x&);
-};
-
-ostream& operator<<(std::ostream& os, const x& o) {
-	os << "< " << o.name << " " << o.age << " " << o.salary << " >";
-	return os;
 }
 
-struct key {
-	int operator()(const x& o) const {
-		return o.salary;
-	}
-};
-
-void change(x& a) {
-	a[0] = 21;
+void help() {
+	cout << "\n";
+	cout << "\tСписок команд: \n\n\t=======================================\n\n\thist - обратиться к меню Гистограммы\n\tmatrix - к меню разреженной матрицы\n\tapointer - к меню алфавитного указателя\n\n\t=======================================\n\n";
 }
 
-void change(const x& a) {
-	cout << a[0];
-}
 
 int main() {
 	setlocale(LC_ALL, "Russian");
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
 	srand(time(0));
-	Histogram<x, int, key> hist({ 1,1000,10000,100000 });
-	hist.add(x("aptem", 19, 19000));
-	cout << hist;
+	string s;
+	cout << "[Main menu]:\n>> ";
+	getline(cin, s);
+	while (s != "exit") {
+		try {
+			string cmd_t = _GetCommand(s);
+			if (cmd_t == "hist") {
+				s = histo_menu::receive(s.find(' ') != string::npos ? s.substr(s.find(' ') + 1, s.size() - cmd_t.size() - 1) : "");
+			}
+			else if (cmd_t == "apointer") {
+				s = APointer_menu::receive(s.find(' ') != string::npos ? s.substr(s.find(' ') + 1, s.size() - cmd_t.size() - 1) : "");
+			}
+			else if (cmd_t == "matrix") {
+				s = SparseMatrix_menu::receive(s.find(' ') != string::npos ? s.substr(s.find(' ') + 1, s.size() - cmd_t.size() - 1) : "");
+			}
+			else if (cmd_t == "help") {
+				help();
+			}
+			else {
+				throw SetException(UnknownCommand);
+			}
+		}
+		catch (SetException e) {
+			cout << e.message();
+		}
+		if (s == "exit") return 0;
+		cout << "[Main menu]:\n>> ";
+		getline(cin, s);
+	}
 	return 0;
 }

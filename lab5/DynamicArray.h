@@ -27,17 +27,20 @@ class RandomAccessIterator {
 private:
 	size_t cur_pos = 0;
 	using type = std::conditional_t<IsConst, const T, T>;
-	DynamicArray<T>* arr = nullptr;
+	std::conditional_t<IsConst, const DynamicArray<T>*, DynamicArray<T>*> arr = nullptr;
 public:
 	RandomAccessIterator() = default;
-	RandomAccessIterator(size_t pos, DynamicArray<T>* arr) : arr(arr) {
+	RandomAccessIterator(size_t pos, std::conditional_t<IsConst, const DynamicArray<T>*, DynamicArray<T>*> arr) : arr(arr) {
 		cur_pos = pos;
 	}
 	RandomAccessIterator(const RandomAccessIterator<T, IsConst>& other) : arr(other.arr) {
 		cur_pos = other.cur_pos;
 	}
 	type& operator *() {
-		return arr->Get(cur_pos);
+		return (*arr)[cur_pos];
+	}
+	type& operator *() const {
+		return (*arr)[cur_pos];
 	}
 	RandomAccessIterator<T, IsConst>& operator++() {
 		cur_pos++;
@@ -104,7 +107,7 @@ public:
 		iterator iter(0, this);
 		return iter;
 	}
-	const_iterator cbegin() {
+	const_iterator cbegin() const {
 		const_iterator iter(0, this);
 		return iter;
 	}
@@ -112,7 +115,7 @@ public:
 		iterator iter(used_items, this);
 		return iter;
 	}
-	const_iterator cend() {
+	const_iterator cend() const {
 		const_iterator iter(used_items, this);
 		return iter;
 	}
@@ -411,7 +414,7 @@ T& DynamicArray<T>:: operator[] (int index) {
 
 template <class T>
 const T& DynamicArray<T>:: operator[] (int index) const {
-	return this->Get(index);
+	return items[index];
 }
 
 template <class T>

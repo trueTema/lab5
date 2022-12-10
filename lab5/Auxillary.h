@@ -1,9 +1,32 @@
 #pragma once
-
-#pragma once
 #include <string>
 #include "exception.h"
 using namespace std;
+
+struct Person {
+	short int age = 0;
+	size_t salary = 0;
+	std::string name;
+	Person() = default;
+	Person(unsigned char age, size_t salary, std::string name) {
+		this->age = age;
+		this->salary = salary;
+		this->name = name;
+	}
+	bool operator==(const Person& other) const {
+		return other.name == name && other.age == age && other.salary == salary;
+	}
+	bool operator!=(const Person& other) const {
+		return !(other.name == name && other.age == age && other.salary == salary);
+	}
+	friend std::ostream& operator<<(std::ostream&, const Person&);
+};
+
+std::ostream& operator<<(std::ostream& os, const Person& obj) {
+	os << "< " << obj.name << " " << obj.age << " yrs. " << obj.salary << "$ >";
+	return os;
+}
+
 template<typename _ArgumentType>
 struct Argument {
 private:
@@ -95,6 +118,28 @@ namespace Traits {
 			}
 		}
 	};
+
+	template<>
+	struct _TypeCast<Person> {
+		static Person cast(std::string x) {
+			try {
+				Person res;
+				int pos = x.find('|');
+				res.name = x.substr(0, pos);
+				x.erase(x.begin(), x.begin() + pos+1);
+				pos = x.find('|');
+				res.age = _TypeCast<int>::cast(x.substr(0, pos));
+				x.erase(x.begin(), x.begin() + pos+1);
+				pos = x.find('|');
+				res.salary = _TypeCast<int>::cast(x.substr(0, pos));
+				return res;
+			}
+			catch (...) {
+				throw SetException(IncorrectValue);
+			}
+		}
+	};
+
 	template<>
 	struct _TypeCast<double> {
 		static double cast(std::string x) {
@@ -155,14 +200,14 @@ DynamicArray<Argument<T>>* _MakeArgumentList(string s, bool canBeExclusive) {
 	size_t current = s.find('-', 0);
 	while (current != -1) {
 		if (current == -1) break;
-		if (current + 1 >= s.size() || s[current + 2] != ' ') throw SetException(IncorrectInputFormat);
+		//if (current + 1 >= s.size() || s[current + 2] != ' ') throw SetException(IncorrectInputFormat);
 		char flag = s[current + 1];
 		current += 2;
 		while (current < s.size() && s[current] == ' ') {
 			if (s[current] != ' ') throw SetException(IncorrectInputFormat);
 			current++;
 		}
-		if (current >= s.size()) throw SetException(IncorrectInputFormat);
+		//if (current >= s.size()) throw SetException(IncorrectInputFormat);
 		string arg_value;
 		while (current < s.size() && s[current] != ' ') {
 			if (restricted.find(s[current]) != -1) throw SetException(IncorrectInputFormat);

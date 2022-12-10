@@ -3,7 +3,7 @@
 #include <string>
 enum except_type { MemoryAllocateError, IndexOutOfRange, SizeBelowZero, NegativeRange, 
 	IncorrectComparator, IncorrectRange, IncorrectValue, IncorrectInputFormat, IncorrectIterator, 
-	NoRequiredArgument, UnknownFlag, UnknownCommand, NoSuchElement, IncorrectArraySize, MutuallyExclusive, TooManySort, EmptySequence};
+	NoRequiredArgument, EmptyAP, UnknownFlag,  UnknownCommand, NoSuchElement, IncorrectArraySize, MutuallyExclusive, TooManySort, EmptySequence};
 #include<iostream>
 
 class SetException {
@@ -11,21 +11,22 @@ public:
 	except_type id;
 	SetException(except_type id) { this->id = id; }
 	const char* message() {
-		if (id == MemoryAllocateError) return "Cannot allocate memory";
-		if (id == IndexOutOfRange) return "Subscirpt index out of range";
-		if (id == SizeBelowZero) return "Size below zero";
-		if (id == NegativeRange) return "Range is less than zero";
-		if (id == IncorrectArraySize) return "Range of array isn't correct";
-		if (id == IncorrectComparator) return "Incorrect sorting comparator";
-		if (id == IncorrectRange) return "The size of sequence isn't a power of 2";
-		if (id == IncorrectValue) return "Not allowed parameter value";
-		if (id == NoRequiredArgument) return "No required argument for command";
-		if (id == UnknownFlag) return "Unknown flag name for this command";
-		if (id == UnknownCommand) return "Unknown command name";
-		if (id == IncorrectInputFormat) return "Incorrect Input format";
-		if (id == MutuallyExclusive) return "There are two or more mutually exclusive arguments";
-		if (id == TooManySort) return "You cannot compare too much function at the same time.";
-		if (id == EmptySequence) return "Your sequence is empty";
-		if (id == NoSuchElement) return "There are no such element in dictionary <!>";
+		if (id == MemoryAllocateError) return "\n[Error] Cannot allocate memory\n";
+		if (id == IndexOutOfRange) return "\n[Error] Subscirpt index out of range\n";
+		if (id == SizeBelowZero) return "\n[Error] Size below zero\n";
+		if (id == NegativeRange) return "\n[Error] Range is less than zero\n";
+		if (id == IncorrectArraySize) return "\n[Error] Range of array isn't correct\n";
+		if (id == IncorrectComparator) return "\n[Error] Incorrect sorting comparator\n";
+		if (id == IncorrectRange) return "\n[Error] The size of sequence isn't equal to vertical size\n";
+		if (id == IncorrectValue) return "\n[Error] Not allowed parameter value\n";
+		if (id == NoRequiredArgument) return "\n[Error] No required argument for command\n";
+		if (id == UnknownFlag) return "\n[Error] Unknown flag name for this command\n";
+		if (id == UnknownCommand) return "\n[Error] Unknown command name\n";
+		if (id == IncorrectInputFormat) return "\n[Error] Incorrect Input format\n";
+		if (id == MutuallyExclusive) return "\n[Error] There are two or more mutually exclusive arguments\n";
+		if (id == TooManySort) return "\n[Error] You cannot compare too much function at the same time\n";
+		if (id == EmptySequence) return "\n[Error] Your histogram hasn't created yet\n";
+		if (id == EmptyAP) return "\n[Error] Your alphabet pointer hasn't created yet\n";
+		if (id == NoSuchElement) return "\n[Error] There are no such element had found\n";
 	}
 };

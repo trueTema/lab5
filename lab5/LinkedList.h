@@ -216,7 +216,7 @@ public:
 		iterator iter(this->items->head, this);
 		return iter;
 	}
-	const_iterator cbegin() {
+	const_iterator cbegin() const {
 		if (items->head == nullptr) {
 			const_iterator iter(this->items->tail, this);
 			return iter;
@@ -228,7 +228,7 @@ public:
 		iterator iter(this->items->tail, this);
 		return iter;
 	}
-	const_iterator cend() {
+	const_iterator cend() const {
 		const_iterator iter(this->items->tail, this);
 		return iter;
 	}
@@ -318,16 +318,19 @@ class BidirectionalIterator {
 protected:
 	using type = std::conditional_t<IsConst, const T&, T&>;
 	typename LinkedList<T>::Item* item = nullptr;
-	LinkedList<T>* arr = nullptr;
+	const LinkedList<T>* arr = nullptr;
 public:
 	BidirectionalIterator() = default;
-	BidirectionalIterator(typename LinkedList<T>::Item* item, LinkedList<T>* arr) : arr(arr) {
+	BidirectionalIterator(typename LinkedList<T>::Item* item, const LinkedList<T>* arr) : arr(arr) {
 		this->item = &(*item);
 	}
 	BidirectionalIterator(const BidirectionalIterator<T, IsConst>& other) : arr(other.arr) {
 		this->item = &(*other.item);
 	}
 	type operator *() {
+		return item->data;
+	}
+	type operator *() const {
 		return item->data;
 	}
 	BidirectionalIterator<T, IsConst>& operator++() {
