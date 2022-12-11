@@ -152,6 +152,7 @@
     <ClInclude Include="Histogram.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="menu.h" />
+    <ClInclude Include="random.h" />
     <ClInclude Include="RBTree.h" />
     <ClInclude Include="Set.h" />
     <ClInclude Include="Sparse_matrix.h" />

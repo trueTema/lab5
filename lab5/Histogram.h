@@ -276,6 +276,7 @@ public:
 			hd[i] = LinkedList<_Obj>();
 		}
 	}
+
 	Histogram(DynamicArray<_Obj>& vector, DynamicArray<_KeyType>& bins) {
 		if (bins.GetSize() < 2) throw SetException(IncorrectRange);
 		hd.reserve(bins.GetSize() - 1);

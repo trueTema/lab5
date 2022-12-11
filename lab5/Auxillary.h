@@ -23,7 +23,7 @@ struct Person {
 };
 
 std::ostream& operator<<(std::ostream& os, const Person& obj) {
-	os << "< " << obj.name << " " << obj.age << " yrs. " << obj.salary << "$ >";
+	os << "< " << obj.name << " " << obj.age << " yrs. " << obj.salary << "RUR >";
 	return os;
 }
 
@@ -209,12 +209,14 @@ DynamicArray<Argument<T>>* _MakeArgumentList(string s, bool canBeExclusive) {
 		}
 		//if (current >= s.size()) throw SetException(IncorrectInputFormat);
 		string arg_value;
-		while (current < s.size() && s[current] != ' ') {
-			if (restricted.find(s[current]) != -1) throw SetException(IncorrectInputFormat);
-			arg_value += s[current];
-			current++;
+		if (s[current] != '-') {
+			while (current < s.size() && s[current] != ' ') {
+				if (restricted.find(s[current]) != -1) throw SetException(IncorrectInputFormat);
+				arg_value += s[current];
+				current++;
+			}
+			current = s.find('-', current + 1);
 		}
-		current = s.find('-', current + 1);
 		Argument<T> cur(flag, _TypeCast<T>::cast(arg_value));
 		for (DynamicArray<Argument<string>>::iterator i = res->begin(); (i != res->end()) && !canBeExclusive; i++) {
 			if ((*i).GetFlag() == cur.GetFlag()) {

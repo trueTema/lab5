@@ -3,7 +3,7 @@
 #include <string>
 enum except_type { MemoryAllocateError, IndexOutOfRange, SizeBelowZero, NegativeRange, 
 	IncorrectComparator, IncorrectRange, IncorrectValue, IncorrectInputFormat, IncorrectIterator, 
-	NoRequiredArgument, EmptyAP, UnknownFlag,  UnknownCommand, NoSuchElement, IncorrectArraySize, MutuallyExclusive, TooManySort, EmptySequence};
+	NoRequiredArgument, EmptyAP,EmptySM, UnknownFlag,  UnknownCommand, NoSuchElement, IncorrectArraySize, MutuallyExclusive, TooManySort, EmptySequence};
 #include<iostream>
 
 class SetException {
@@ -27,6 +27,7 @@ public:
 		if (id == TooManySort) return "\n[Error] You cannot compare too much function at the same time\n";
 		if (id == EmptySequence) return "\n[Error] Your histogram hasn't created yet\n";
 		if (id == EmptyAP) return "\n[Error] Your alphabet pointer hasn't created yet\n";
+		if (id == EmptySM) return "\n[Error] Your sparse matrix hasn't created yet\n";
 		if (id == NoSuchElement) return "\n[Error] There are no such element had found\n";
 	}
 };

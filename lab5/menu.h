@@ -2,6 +2,7 @@
 #include "DynamicArray.h"
 #include <string>
 #include "Histogram.h"
+#include "random.h"
 
 using namespace Traits;
 
@@ -56,14 +57,23 @@ namespace histo_menu {
 				da.Append(_TypeCast<fillT>::cast(cur));
 		}
 	public:
-		HistoMenu(bool f) {
+		HistoMenu(bool f, bool isRand) {
+			if (f && isRand) throw SetException(MutuallyExclusive);
 			DynamicArray<_KeyType> da;
 			DynamicArray<_Obj> obj;
 			std::string str;
 			std::cout << "Enter partition:\n>> ";
 			std::getline(std::cin, str);
 			fill_bins<_KeyType>(da, str);
-			if (f) {
+			if (isRand) {
+				std::cout << "Enter size:\n>> ";
+				std::getline(std::cin, str);
+				int size = _TypeCast<int>::cast(str);
+				if (size < 0) throw SetException(IncorrectValue);
+				for (int i = 0; i < size; i++) {
+					obj.Append(random_unit<_Obj>::generate());
+				}
+			} else if (f) {
 				std::cout << "Enter items:\n>> ";
 				std::getline(std::cin, str);
 				fill_bins<_Obj>(obj, str);
@@ -103,8 +113,8 @@ namespace histo_menu {
 	};
 
 	template<typename _Obj, typename _KeyType = _Obj, typename _Key = MyKeyGetter<_Obj>, typename _Cmp = MyComparator<_KeyType>>
-	std::string main_listener(bool f) {
-		HistoMenu<_Obj, _KeyType, _Key, _Cmp> hm(f);
+	std::string main_listener(bool f, bool isRand) {
+		HistoMenu<_Obj, _KeyType, _Key, _Cmp> hm(f, isRand);
 		std::string cmd;
 		std::cout << "[Histogram menu]:\n>> ";
 		getline(std::cin, cmd);
@@ -134,6 +144,7 @@ namespace histo_menu {
 				objType keytype = obj;
 				getter keygetter = Obj;
 				bool f = true;
+				bool isRand = false;
 				for (int i = 0; i < arr->GetSize(); i++) {
 					if (arr->Get(i).GetFlag() == 'o') {
 						std::string x = arr->Get(i).Getvalue();
@@ -150,6 +161,11 @@ namespace histo_menu {
 							obj = Person;
 						}
 						else throw SetException(IncorrectValue);
+					}
+					else if (arr->Get(i).GetFlag() == 'r') {
+						if (arr->Get(i).Getvalue() != "") throw SetException(IncorrectValue);
+						f = false;
+						isRand = true;
 					}
 					else if (arr->Get(i).GetFlag() == 'k') {
 						std::string x = arr->Get(i).Getvalue();
@@ -200,10 +216,10 @@ namespace histo_menu {
 					if (obj == Int) {
 						if (keytype == Int) {
 							if (keygetter == Obj) {
-								cmd = main_listener<int, int>(f);
+								cmd = main_listener<int, int>(f, isRand);
 							}
 							else if (keygetter == Mod) {
-								cmd = main_listener<int, int, mod_getter<int>>(f);
+								cmd = main_listener<int, int, mod_getter<int>>(f, isRand);
 							}
 							else throw SetException(IncorrectValue);
 						}
@@ -214,10 +230,10 @@ namespace histo_menu {
 					else if (obj == Float) {
 						if (keytype == Float) {
 							if (keygetter == Obj) {
-								cmd = main_listener<double, double>(f);
+								cmd = main_listener<double, double>(f, isRand);
 							}
 							else if (keygetter == Mod) {
-								cmd = main_listener<double, double, mod_getter<double>>(f);
+								cmd = main_listener<double, double, mod_getter<double>>(f, isRand);
 							}
 							else throw SetException(IncorrectValue);
 						}
@@ -228,13 +244,13 @@ namespace histo_menu {
 					else if (obj == String) {
 						if (keytype == Int) {
 							if (keygetter == Length) {
-								cmd = main_listener<std::string, int, len_getter>(f);
+								cmd = main_listener<std::string, int, len_getter>(f, isRand);
 							}
 							else throw SetException(IncorrectValue);
 						}
 						else if (keytype == String) {
 							if (keygetter == Obj) {
-								cmd = main_listener<std::string, std::string>(f);
+								cmd = main_listener<std::string, std::string>(f, isRand);
 							}
 							else throw SetException(IncorrectValue);
 						}
@@ -245,10 +261,10 @@ namespace histo_menu {
 					else if (obj == Person) {
 						if (keytype == Int) {
 							if (keygetter == Age) {
-								cmd = main_listener<struct Person, int, age_getter>(f);
+								cmd = main_listener<struct Person, int, age_getter>(f, isRand);
 							}
 							else if (keygetter == Salary) {
-								cmd = main_listener<struct Person, int, salary_getter>(f);
+								cmd = main_listener<struct Person, int, salary_getter>(f, isRand);
 							}
 							else throw SetException(IncorrectValue);
 						}
@@ -452,11 +468,20 @@ namespace SparseMatrix_menu {
 	}
 
 	template<typename T>
-	sparse_mmatrix<T>* make_matrix(bool f, int hor, int ver) {
+	sparse_mmatrix<T>* make_matrix(bool f, int hor, int ver, bool isRand) {
 		if (hor < 0) throw SetException(IncorrectValue);
 		if (ver < 0) throw SetException(IncorrectValue);
+		if (f && isRand) throw SetException(MutuallyExclusive);
 		sparse_mmatrix<T>* sm = new sparse_mmatrix<T>(hor, ver);
 		std::string str = "";
+		if (isRand) {
+			for (int i = 0; i < hor; i++) {
+				for (int j = 0; j < ver; j++) {
+					sm->set(i + 1, j + 1, rand() % 5 == 0 ? random_unit<T>::generate() : T());
+				}
+			}
+			return sm;
+		}
 		if (f) {
 			for (int i = 0; i < hor; i++) {
 				DynamicArray<T> row;
@@ -479,7 +504,7 @@ namespace SparseMatrix_menu {
 		sparse_mmatrix<T>* sm = nullptr;
 		
 	public:
-		SMMenu(bool f) {
+		SMMenu(bool f, bool isRand) {
 			std::cout << "\nEnter size:\n>> ";
 			DynamicArray<T> arr;
 			std::string str;
@@ -488,7 +513,7 @@ namespace SparseMatrix_menu {
 			if (arr.GetSize() != 2) throw SetException(IncorrectValue);
 			int hor = arr[0];
 			int ver = arr[1];
-			sm = make_matrix<T>(f, hor, ver);
+			sm = make_matrix<T>(f, hor, ver, isRand);
 		}
 		void Process(std::string cmd, DynamicArray<Argument<string>>* arr) {
 			if (cmd == "print") {
@@ -545,7 +570,7 @@ namespace SparseMatrix_menu {
 			}
 			else if (cmd == "add_matr") {
 				if (arr->GetSize() > 0) throw SetException(UnknownFlag);
-				sparse_mmatrix<T>* other = make_matrix<T>(true, sm->get_ver(), sm->get_hor());
+				sparse_mmatrix<T>* other = make_matrix<T>(true, sm->get_ver(), sm->get_hor(), false);
 				*sm += *other;
 			}
 			else if (cmd == "multiply_scal") {
@@ -558,12 +583,12 @@ namespace SparseMatrix_menu {
 			}
 			else if (cmd == "multiply_left") {
 				if (arr->GetSize() > 0) throw SetException(UnknownFlag);
-				sparse_mmatrix<T>* other = make_matrix<T>(true, sm->get_ver(), sm->get_hor());
+				sparse_mmatrix<T>* other = make_matrix<T>(true, sm->get_ver(), sm->get_hor(), false);
 				*sm = (*other) * (*sm);
 			}
 			else if (cmd == "multiply_right") {
 				if (arr->GetSize() > 0) throw SetException(UnknownFlag);
-				sparse_mmatrix<T>* other = make_matrix<T>(true, sm->get_ver(), sm->get_hor());
+				sparse_mmatrix<T>* other = make_matrix<T>(true, sm->get_ver(), sm->get_hor(), false);
 				*sm = (*sm) * (*other);
 			}
 			else if (cmd == "help") {
@@ -577,8 +602,8 @@ namespace SparseMatrix_menu {
 	};
 
 	template<typename T>
-	std::string main_listener(bool f) {
-		SMMenu<T> apm(f);
+	std::string main_listener(bool f, bool isRand) {
+		SMMenu<T> apm(f, isRand);
 		std::string cmd;
 		std::cout << "[Sparse matrix menu]:\n>> ";
 		getline(std::cin, cmd);
@@ -605,6 +630,7 @@ namespace SparseMatrix_menu {
 				enum type { Int, Float };
 				type T = Int;
 				bool f = true;
+				bool isRand = false;
 				for (int i = 0; i < arr->GetSize(); i++) {
 					if (arr->Get(i).GetFlag() == 't') {
 						if (arr->Get(i).Getvalue() == "int") {
@@ -617,6 +643,11 @@ namespace SparseMatrix_menu {
 							throw SetException(IncorrectValue);
 						}
 					}
+					else if (arr->Get(i).GetFlag() == 'r') {
+						if (arr->Get(i).Getvalue() != "") throw SetException(IncorrectValue);
+						f = false;
+						isRand = true;
+					}
 					else if (arr->Get(i).GetFlag() == 'e') {
 						if (arr->Get(i).Getvalue() != "") throw SetException(IncorrectValue);
 						f = false;
@@ -628,10 +659,10 @@ namespace SparseMatrix_menu {
 				cmd = "";
 					try {
 						if (T == Int) {
-							cmd = main_listener<int>(f);
+							cmd = main_listener<int>(f, isRand);
 						}
 						else if (T == Float) {
-							cmd = main_listener<double>(f);
+							cmd = main_listener<double>(f, isRand);
 						}
 					}
 					catch (SetException e) {
@@ -648,7 +679,7 @@ namespace SparseMatrix_menu {
 				getline(std::cin, cmd);
 			}
 			else {
-				throw SetException(EmptyAP);
+				throw SetException(EmptySM);
 			}
 		}
 		return cmd;

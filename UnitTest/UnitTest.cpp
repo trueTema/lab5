@@ -32,7 +32,9 @@ namespace UnitTest
 		}
 		TEST_METHOD(CorrectTest)
 		{
-			Histogram<int> hist({7,8,4,3,5,10,1,15,49,49,49,44,35, 101, 122,123,122, 999, 456, 900}, { 1, 10, 50, 100, 200, 500, 1000 });
+			DynamicArray<int> vec = { 7,8,4,3,5,10,1,15,49,49,49,44,35, 101, 122,123,122, 999, 456, 900 };
+			DynamicArray<int> bins = { 1, 10, 50, 100, 200, 500, 1000 };
+			Histogram<int> hist(vec, bins);
 			std::vector<statistics<int, int, MyKeyGetter<int>, MyComparator<int>>> stat = hist.get_stats();
 			double aver1 = 7 + 8 + 4 + 3 + 5 + 1;
 			double aver2 = 10 + 15 + 35 + 44 + 49 + 49 + 49;

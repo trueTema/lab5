@@ -37,7 +37,24 @@ private:
 		size_t prev_capacity = hash_capacity;
 		this->hash_capacity = newsize;
 		HashVector.Resize(hash_capacity);
-		for (int i = prev_capacity; i < hash_capacity; i++) {
+		for (int i = 0; i < hash_capacity; i++) {
+			HashVector[i] = HashList.end();
+		}
+		for (typename LinkedList<Elem>::iterator it = HashList.begin(); it != HashList.end(); ) {
+			if (HashVector[(*it).real_hash % hash_capacity] == HashList.end()) {
+				(*it).tmp_hash = (*it).real_hash % hash_capacity;
+				HashList.Prepend(*it);
+				HashVector[(*it).real_hash % hash_capacity] = HashList.begin();
+				HashList.del_item(it);
+			}
+			else {
+				(*it).tmp_hash = (*it).real_hash % hash_capacity;
+				HashList.InsertAt(*it, HashVector[(*it).real_hash % hash_capacity]);
+				HashVector[(*it).real_hash % hash_capacity]--;
+				HashList.del_item(it);
+			}
+		}
+		/*for (int i = prev_capacity; i < hash_capacity; i++) {
 			HashVector[i] = HashList.end();
 		}
 
@@ -46,7 +63,7 @@ private:
 				(*it).tmp_hash = (*it).real_hash % hash_capacity;
 				HashList.Prepend(*it);
 				HashVector[(*it).real_hash % hash_capacity] = HashList.begin();
-				if (it == HashVector[(*it).real_hash % prev_capacity]) {
+				if ((*it).real_hash % prev_capacity < HashVector.GetSize() && it == HashVector[(*it).real_hash % prev_capacity]) {
 					HashVector[(*it).real_hash % prev_capacity] = HashList.end();
 				}
 				HashList.del_item(it);
@@ -55,12 +72,12 @@ private:
 				(*it).tmp_hash = (*it).real_hash % hash_capacity;
 				HashList.InsertAt(*it, HashVector[(*it).real_hash % hash_capacity]);
 				HashVector[(*it).real_hash % hash_capacity]--;
-				if (it == HashVector[(*it).real_hash % prev_capacity]) {
+				if ((*it).real_hash % prev_capacity < HashVector.GetSize() && it == HashVector[(*it).real_hash % prev_capacity]) {
 					HashVector[(*it).real_hash % prev_capacity] = HashList.end();
 				}
 				HashList.del_item(it);
 			}
-		}
+		}*/
 	}
 public:
 
@@ -116,8 +133,11 @@ public:
 		size_t hash = hasher(key);
 		for (typename LinkedList<Elem>::iterator it = HashVector[hash % hash_capacity]; it != HashList.end() && (*it).tmp_hash == (hash % hash_capacity); it++) {
 			if (comparator((*it).data.first, key)) {
-				if (it == HashVector[hash % hash_capacity] && ((it + 1) == HashList.end() || (*(it + 1)).real_hash != (*it).real_hash)) {
+				if (it == HashVector[hash % hash_capacity] && ((it + 1) == HashList.end() || (*(it + 1)).tmp_hash != (*it).tmp_hash)) {
 					HashVector[hash % hash_capacity] = HashList.end();
+				}
+				else if (it == HashVector[hash % hash_capacity]) {
+					HashVector[hash % hash_capacity]++;
 				}
 				HashList.del_item(it);
 				this->size--;
